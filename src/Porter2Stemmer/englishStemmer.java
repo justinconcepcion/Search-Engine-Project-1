@@ -13,6 +13,9 @@ public class englishStemmer extends Porter2Stemmer.SnowballStemmer {
 
 private static final long serialVersionUID = 1L;
 
+
+//comment to check
+
         private final static englishStemmer methodObject = new englishStemmer ();
 
                 private final static Among a_0[] = {
