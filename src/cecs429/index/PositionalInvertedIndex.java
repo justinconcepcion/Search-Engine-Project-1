@@ -15,7 +15,7 @@ public class PositionalInvertedIndex implements Index {
 		super();
 		this.mAdjacencyList = new HashMap<>();
 	}
-
+// Testing for pull merge
 	@Override
 	public List<Posting> getPostings(String term) {
 		List<Posting> temp = new ArrayList<>();
