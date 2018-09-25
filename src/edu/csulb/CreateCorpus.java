@@ -16,7 +16,6 @@ public class CreateCorpus {
 
 	public static final String JSON_PATH = "D:\\SEARCH_ENGINE\\project\\all-nps-sites.json";
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		 
 		try {
 			JsonReader reader = new JsonReader(new FileReader(JSON_PATH));
@@ -34,7 +33,6 @@ public class CreateCorpus {
 			}
 			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

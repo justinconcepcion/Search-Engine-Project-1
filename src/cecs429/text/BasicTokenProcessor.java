@@ -9,4 +9,5 @@ public class BasicTokenProcessor implements TokenProcessor {
 	public String processToken(String token) {
 		return token.replaceAll("\\W", "").toLowerCase();
 	}
+	
 }
