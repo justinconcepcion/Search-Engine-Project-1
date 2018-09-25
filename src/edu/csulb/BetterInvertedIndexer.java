@@ -14,12 +14,33 @@ import cecs429.text.EnglishTokenStream;
 import cecs429.text.TokenStream;
 
 public class BetterInvertedIndexer {
+	public static final String TEXT_FILE_CORPUS_DIRECTORY_PATH = "D:\\SEARCH_ENGINE\\project\\MobyDick10Chapters";
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		DocumentCorpus corpus = DirectoryCorpus.loadTextDirectory(Paths.get("").toAbsolutePath(), ".txt");
-		Index index = indexCorpus(corpus);
+		DocumentCorpus corpus;
+		/*
+		 * Use the local directory path below for text file and json file.
+		 */
+		
+		System.out.println("Select the folder to index from below");
+		System.out.println("1. D:\\SEARCH_ENGINE\\project\\JSONcorpus");
+		System.out.println("2. D:\\SEARCH_ENGINE\\project\\MobyDick10Chapters");
 		Scanner reader = new Scanner(System.in);
+		String selectePath=reader.nextLine();
+		switch (selectePath) {
+		case "1":
+			corpus=DirectoryCorpus.loadJsonDirectory(Paths.get("D:\\SUBJECTS\\SEARCH_ENGINE\\SEARCH_ENGINE\\project\\JsonTest").toAbsolutePath(), ".json");
+			break;
+		case "2":
+			corpus=DirectoryCorpus.loadTextDirectory(Paths.get("D:\\SUBJECTS\\SEARCH_ENGINE\\SEARCH_ENGINE\\project\\MobyDick10Chapters").toAbsolutePath(), ".txt");
+			break;
+		default:
+			corpus=DirectoryCorpus.loadTextDirectory(Paths.get("D:\\\\SUBJECTS\\\\SEARCH_ENGINE\\\\SEARCH_ENGINE\\\\project\\\\MobyDick10Chapters").toAbsolutePath(), ".txt");
+		}
+		
+		Index index = indexCorpus(corpus);
+		
 		String query = "";
 		do {
 			System.out.println("Enter the term to search:");
