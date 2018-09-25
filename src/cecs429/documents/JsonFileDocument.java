@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.lang.reflect.Type;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -25,23 +26,20 @@ public class JsonFileDocument implements FileDocument {
 
 	@Override
 	public int getId() {
-		// TODO Auto-generated method stub
 		return mDocumentId;
 	}
 
 	@Override
 	public Reader getContent() {
-		// TODO Auto-generated method stub
 		JsonReader reader;
 		JsonDoc doc = null;
 		try {
-			reader = new JsonReader(Files.newBufferedReader(mFilePath));
+			reader = new JsonReader(Files.newBufferedReader(mFilePath,Charset.forName("ISO-8859-9")));
 			Gson gson = new Gson();
 			Type type = new TypeToken<JsonDoc>() {}.getType();
 			doc = gson.fromJson(reader, type);
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		if (doc != null) {
@@ -53,11 +51,10 @@ public class JsonFileDocument implements FileDocument {
 
 	@Override
 	public String getTitle() {
-		// TODO Auto-generated method stub
 		JsonReader reader;
 		JsonDoc doc = null;
 		try {
-			reader = new JsonReader(Files.newBufferedReader(mFilePath));
+			reader = new JsonReader(Files.newBufferedReader(mFilePath,Charset.forName("ISO-8859-9")));
 			Gson gson = new Gson();
 			Type type = new TypeToken<JsonDoc>() {}.getType();
 			doc = gson.fromJson(reader, type);
@@ -74,8 +71,11 @@ public class JsonFileDocument implements FileDocument {
 
 	@Override
 	public Path getFilePath() {
-		// TODO Auto-generated method stub
 		return mFilePath;
+	}
+	
+	public static FileDocument loadJsonFileDocument(Path absolutePath, int documentId) {
+		return new JsonFileDocument(documentId, absolutePath);
 	}
 
 }
