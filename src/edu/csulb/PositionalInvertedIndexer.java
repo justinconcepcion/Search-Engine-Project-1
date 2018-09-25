@@ -26,6 +26,7 @@ public class PositionalInvertedIndexer {
 		Scanner reader = new Scanner(System.in);
 		String query = "";
 		
+		// Testing for git.
 		// Logic to get input from the user.
 		do {
 			System.out.println("Enter the term to search:");
