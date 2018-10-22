@@ -1,6 +1,5 @@
 
-package Porter2Stemmer;
-import java.lang.reflect.InvocationTargetException;
+package cecs429.porterstemmer;
 
 public abstract class SnowballStemmer extends SnowballProgram {
     public abstract boolean stem();
