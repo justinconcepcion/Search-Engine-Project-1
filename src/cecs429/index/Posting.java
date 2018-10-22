@@ -8,36 +8,58 @@ import java.util.List;
  * A Posting encapulates a document ID associated with a search query component.
  */
 public class Posting {
-	private int mDocumentId;
-	private List<Integer> mPositions;
-	
-	public Posting(int documentId) {
-		mDocumentId = documentId;
-		mPositions = new ArrayList<>();
-	}
-	
-	public int getDocumentId() {
-		return mDocumentId;
-	}
-	
-	public List<Integer> getPositions() {
-		return mPositions;
-	}
-	
-	public void addPosition(int position) {
-		mPositions.add(position);
-	}
-	
-	@Override
-		public boolean equals(Object obj) {
-			// TODO Auto-generated method stub
-			Posting temp=(Posting)obj;
-			return mDocumentId==temp.getDocumentId();
-		}
-	@Override
-	public int hashCode() {
-		// TODO Auto-generated method stub
-		
-		return  mDocumentId*13;
-	}
+    private int mDocumentId;
+    private List<Integer> mPositions;
+
+    public Posting(int documentId) {
+        mDocumentId = documentId;
+        mPositions = new ArrayList<>();
+    }
+
+    /**
+     * Gets document ID of the current posting object.
+     *
+     * @return Document ID of the Posting.
+     */
+    public int getDocumentId() {
+        return mDocumentId;
+    }
+
+    /**
+     * Get list of positions, where the term occurs in the current posting.
+     *
+     * @return List of integers, i.e. positions of the current posting.
+     */
+    public List<Integer> getPositions() {
+        return mPositions;
+    }
+
+    /**
+     * Add position of the term in the current document, in the list of positions.
+     *
+     * @param position Integer to which the current term is.
+     */
+    public void addPosition(int position) {
+        mPositions.add(position);
+    }
+
+    /**
+     * Check if two Posting objects are equal or not.
+     *
+     * @param obj Posting object to compare.
+     * @return Boolean value as true if document Ids of both the posting objects match.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Posting) {
+            Posting temp = (Posting) obj;
+            return mDocumentId == temp.getDocumentId();
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return mDocumentId * 13;
+    }
 }

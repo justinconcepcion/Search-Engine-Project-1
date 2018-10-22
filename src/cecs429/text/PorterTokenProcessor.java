@@ -1,79 +1,70 @@
 package cecs429.text;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
-import Porter2Stemmer.SnowballStemmer;
+import cecs429.porterstemmer.SnowballStemmer;
 
 public class PorterTokenProcessor implements MultipleTokenProcessor {
-	public ArrayList<String> processToken(String term) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-		
-		ArrayList<String> tokens = new ArrayList<String>();
-		ArrayList<String> terms = new ArrayList<String>();
-		String temp = "";
-		temp = (removeNonAlphaNumeric(term));
-		temp = removeQuotes(temp);
-		tokens = removeHyphens(temp);
-		System.out.println(tokens);
-		
-		for (String token: tokens) {
-			Class stemClass = Class.forName("Porter2Stemmer." + "englishStemmer");
-	    	SnowballStemmer stemmer = (SnowballStemmer) stemClass.newInstance();
-	    	stemmer.setCurrent(token);
-	    	stemmer.stem();
-	    	String stemmedTerm = stemmer.getCurrent();
-	    	terms.add(stemmedTerm);
-		}
-		return terms;
-	}
-	private static String removeNonAlphaNumeric(String term) {
-		String temp = "";
-		if(!(Character.isDigit(term.charAt(0)) || Character.isLetter(term.charAt(0)))) {
-			//do nothing
-		}
-		else {
-			temp += term.charAt(0);
-		}
-		
-		for (int i = 1; i < term.length()-1; i++) {
-			temp += term.charAt(i);
-		}
-		
-		if(!(Character.isDigit(term.charAt(term.length()-1)) || Character.isLetter(term.charAt(term.length()-1)))) {
-			//do nothing
-		}
-		
-		else {
-			temp += term.charAt(term.length()-1);
-		}
+    public List<String> processToken(String term) {
 
-		return temp;
-	}
-	
-	private static String removeQuotes(String term) {
-		String temp = "";
-		for (int i = 0; i < term.length(); i++) {
-			if((term.charAt(i) == '"' || term.charAt(i) == '\'')) {
-				//do nothing
-			}
-			else {
-				temp +=  term.charAt(i);
-			}
-		}
-		return temp;
-	}
-	
-	private static ArrayList<String> removeHyphens(String term) {
-		
-		ArrayList<String> hyphenWords = new ArrayList<String>();
-		String[] splitString = term.split("-");
-		hyphenWords.addAll(Arrays.asList(splitString));
-		String temp = "";
-		for (int i = 0; i < splitString.length; i++) {
-			temp += splitString[i];
-		}
-		hyphenWords.add(temp);
-		return hyphenWords;
-	}
+        ArrayList<String> tokens = new ArrayList<String>();
+        ArrayList<String> terms = new ArrayList<String>();
+        String temp = "";
+        temp = removeNonAlphaNumeric(term);
+        temp = removeQuotes(temp);
+        if (temp.contains("-"))
+            tokens = (ArrayList<String>) removeHyphens(temp.toLowerCase());
+        else
+            tokens.add(temp.toLowerCase());
+
+        try {
+            for (String token : tokens) {
+                Class stemClass = Class.forName("cecs429.porterstemmer." + "EnglishStemmer");
+                SnowballStemmer stemmer = (SnowballStemmer) stemClass.newInstance();
+                stemmer.setCurrent(token);
+                stemmer.stem();
+                String stemmedTerm = stemmer.getCurrent();
+                terms.add(stemmedTerm);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return terms;
+    }
+
+    private static String removeNonAlphaNumeric(String term) {
+        int i = 0;
+        while (i < term.length() && (!(Character.isDigit(term.charAt(i)) || Character.isLetter(term.charAt(i))))) {
+            i++;
+        }
+        term = term.substring(i);
+        int j = term.length();
+        while (j > 0 && !(Character.isDigit(term.charAt(j - 1)) || Character.isLetter(term.charAt(j - 1))))
+            j--;
+        term = term.substring(0, j);
+
+        return term;
+    }
+
+    private static String removeQuotes(String term) {
+        term = term.replace("\"", "");
+        term = term.replace("\'", "");
+        return term;
+    }
+
+    private static List<String> removeHyphens(String term) {
+
+        List<String> hyphenWords = new ArrayList<String>();
+        String[] splitString = term.split("-");
+        term = term.replace("-", "");
+        hyphenWords.add(term);
+        for (String str : splitString) {
+            if (str.trim().length() > 0) {
+                hyphenWords.add(str);
+            }
+        }
+        return hyphenWords;
+    }
 
 }
