@@ -1,4 +1,4 @@
-package edu.csulb;
+package cecs429.indexers;
 
 import java.nio.file.Paths;
 import java.util.Scanner;
@@ -21,7 +21,7 @@ import cecs429.text.TokenStream;
 public class PositionalInvertedIndexer {
 
 	public static void main(String[] args) {
-		DocumentCorpus corpus = DirectoryCorpus.loadTextDirectory(Paths.get("C:\\Users\\KARAN\\Desktop\\Study\\4th Sem\\SET\\MobyDick10Chapters").toAbsolutePath(), ".txt");
+		DocumentCorpus corpus = DirectoryCorpus.loadTextDirectory(Paths.get("D:\\SUBJECTS\\SEARCH_ENGINE\\SEARCH_ENGINE\\project\\MobyDick10Chapters").toAbsolutePath(), ".txt");
 		Index index = indexCorpus(corpus);
 		Scanner reader = new Scanner(System.in);
 		String query = "";

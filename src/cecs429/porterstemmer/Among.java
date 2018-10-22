@@ -1,4 +1,4 @@
-package Porter2Stemmer;
+package cecs429.porterstemmer;
 
 import java.lang.reflect.Method;
 

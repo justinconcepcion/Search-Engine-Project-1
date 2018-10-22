@@ -5,9 +5,7 @@ public class JsonDoc {
 	private String body;
 	private String url;
 	private String title;
-	
-	
-	
+
 	public String getTitle() {
 		return title;
 	}

@@ -1,4 +1,4 @@
-package edu.csulb;
+package cecs429.indexers;
 
 import cecs429.index.Index;
 import cecs429.index.Posting;

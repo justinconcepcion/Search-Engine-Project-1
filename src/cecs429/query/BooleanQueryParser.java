@@ -3,11 +3,15 @@ package cecs429.query;
 import java.util.ArrayList;
 import java.util.List;
 
+import cecs429.text.MultipleTokenProcessor;
+
 /**
  * Parses boolean queries according to the base requirements of the CECS 429 project.
  * Does not handle phrase queries, NOT queries, NEAR queries, or wildcard queries... yet.
  */
 public class BooleanQueryParser {
+	private MultipleTokenProcessor processor;
+	
 	/**
 	 * Identifies a portion of a string with a starting index and a length.
 	 */
@@ -37,6 +41,12 @@ public class BooleanQueryParser {
 	/**
 	 * Given a boolean query, parses and returns a tree of QueryComponents representing the query.
 	 */
+	
+	public BooleanQueryParser(MultipleTokenProcessor processor) {
+		super();
+		this.processor = processor;
+	}
+	
 	public QueryComponent parseQuery(String query) {
 		int start = 0;
 		
@@ -97,7 +107,9 @@ public class BooleanQueryParser {
 			return null;
 		}
 	}
-	
+
+
+
 	/**
 	 * Locates the start index and length of the next subquery in the given query string,
 	 * starting at the given index.
@@ -147,6 +159,50 @@ public class BooleanQueryParser {
 		while (subquery.charAt(startIndex) == ' ') {
 			++startIndex;
 		}
+
+		// Check for NEAR literal start.
+		if(subquery.charAt(startIndex) == '[') {
+
+            ++startIndex;
+            // To locate the next double quote to find the end of this literal.
+            int nextDoubleQuote = subquery.indexOf(']', startIndex);
+            if(nextDoubleQuote < 0) {
+                lengthOut = subLength - startIndex;
+            } else {
+                lengthOut = nextDoubleQuote - startIndex;
+            }
+
+            // First split the query with spaces. e.g. [angles NEAR/2 baseball] will give 'angles', 'NEAR/2' and baseball.
+            String[] splitWithSpaces = subquery.substring(startIndex, startIndex + lengthOut).split(" ");
+
+            int k = Integer.parseInt(splitWithSpaces[1].split("/")[1]);
+
+            // This is a term literal containing a single term.
+            return new Literal(
+                    new StringBounds(startIndex, lengthOut+1),
+                    new NearLiteral(splitWithSpaces[0], splitWithSpaces[2],k,processor));
+        }
+		
+		// Convert the query to any Literal using recursion. This term will be used for AND NOT 
+		if(subquery.charAt(startIndex) == '-') {
+			Literal temp=findNextLiteral(subquery,startIndex+1);
+			return new Literal(temp.bounds, new NotQuery(temp.literalComponent));
+		}
+
+		// Check for Phrase Literal start.
+		if(subquery.charAt(startIndex) == '"') {
+			int nextQuote = subquery.indexOf(subquery.charAt(startIndex), startIndex+1);
+			if (nextQuote < 0) {
+				// No more literals in this subquery. Incomplete Input.
+				lengthOut = subLength - startIndex;
+			}
+			else {
+				lengthOut = nextQuote - startIndex+1;
+			}
+			return new Literal(
+					 new StringBounds(startIndex+1, lengthOut-1),
+					 new PhraseLiteral(subquery.substring(startIndex+1, startIndex + lengthOut-1),processor));
+		}
 		
 		// Locate the next space to find the end of this literal.
 		int nextSpace = subquery.indexOf(' ', startIndex);
@@ -161,13 +217,8 @@ public class BooleanQueryParser {
 		// This is a term literal containing a single term.
 		return new Literal(
 		 new StringBounds(startIndex, lengthOut),
-		 new TermLiteral(subquery.substring(startIndex, startIndex + lengthOut)));
-		
-		/*
-		TODO:
-		Instead of assuming that we only have single-term literals, modify this method so it will create a PhraseLiteral
-		object if the first non-space character you find is a double-quote ("). In this case, the literal is not ended
-		by the next space character, but by the next double-quote character.
-		 */
+		 new TermLiteral(subquery.substring(startIndex, startIndex + lengthOut),processor));
+
+
 	}
 }
