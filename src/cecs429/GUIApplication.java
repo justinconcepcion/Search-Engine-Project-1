@@ -154,6 +154,18 @@ public class GUIApplication extends JFrame {
         panel.add(buttonStem);
 
 
+        JButton buttonDiskIndex = new JButton("DiskIndex");
+        buttonDiskIndex.setBounds(335 + 265, 90-30, 239, 23);
+        buttonDiskIndex.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                // Start creating disk index.
+                new DiskIndexWriter( mLablePath.getText()+"\\index").writeIndex(index);
+            }
+        });
+        panel.add(buttonDiskIndex);
+
         JButton buttonIndex = new JButton("Index");
         buttonIndex.setBounds(355, 90, 239, 23);
         buttonIndex.addActionListener(new ActionListener() {
@@ -179,9 +191,12 @@ public class GUIApplication extends JFrame {
                 // Calculating total time taken for indexing.
                 long elapsedTime = stopTime - startTime;
                 mLableInfo.setText(mLableInfo.getText() + "\nDone Indexing." + "\n\nTime to index = " + TimeUnit.MILLISECONDS.toSeconds(elapsedTime) + " seconds");
+
             }
         });
         panel.add(buttonIndex);
+
+
     }
 
     /**
@@ -189,7 +204,7 @@ public class GUIApplication extends JFrame {
      */
     private void chooseDirectory() {
         JFileChooser chooser = new JFileChooser();
-        chooser.setCurrentDirectory(new File("C:\\Users\\KARAN\\eclipse-workspace-hackerrank\\Homework3"));
+        chooser.setCurrentDirectory(new File("C:\\Users\\KARAN\\Desktop\\Study\\4th Sem\\SET\\Projects\\SearchEngineProject\\MobyDick10Chapters"));
         chooser.setDialogTitle("Select Document Corpus");
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         chooser.setAcceptAllFileFilterUsed(false);
