@@ -9,7 +9,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
@@ -50,6 +49,10 @@ public class GUIApplication {
     private MultipleTokenProcessor mTokenProcessor;
     private Index index;
 
+    private static final int MILESTONE_1 = 1;
+    private static final int MILESTONE_2 = 2;
+    private static final int MILESTONE_3 = 3;
+
     private GUIApplication() {
 
         initlizeMainContent();
@@ -79,7 +82,7 @@ public class GUIApplication {
             public void actionPerformed(ActionEvent e) {
 
                 mJFrameMain.setVisible(false);
-                initializeMilestone1Panel();
+                initializeMilestone(MILESTONE_1);
             }
         });
 
@@ -87,6 +90,15 @@ public class GUIApplication {
         btnMilestone2.setText("Milestone 2");
         btnMilestone2.add(Box.createRigidArea(new Dimension(5, 0)));
         firstPanel.add(btnMilestone2);
+
+        btnMilestone2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                mJFrameMain.setVisible(false);
+                initializeMilestone(MILESTONE_2);
+            }
+        });
 
         JButton btnMilestone3 = new JButton();
         btnMilestone3.setText("Milestone 3");
@@ -101,7 +113,7 @@ public class GUIApplication {
         mJFrameMain.setVisible(true);
     }
 
-    private void initializeMilestone1Panel() {
+    private void initializeMilestone(int milestoneNumber) {
         mJFrameMilestone1 = new JFrame("Milestone 1");
         mJFrameMilestone1.setBounds(new Rectangle(0, 0, 900, 900));
         mJFrameMilestone1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -115,35 +127,9 @@ public class GUIApplication {
         lblSelectCorpus.setBounds(10, 8 + 50, 90, 14);
         panelMilestone1.add(lblSelectCorpus);
 
-        mTextFieldQuery = new JTextField();
-        mTextFieldQuery.setBounds(110, 30 + 50, 788, 25);
-        panelMilestone1.add(mTextFieldQuery);
-        mTextFieldQuery.setColumns(50);
-
-        JLabel labelEnterQuery = new JLabel("Enter Query");
-        labelEnterQuery.setBounds(10, 33 + 50, 80, 14);
-        panelMilestone1.add(labelEnterQuery);
-
-        mSplitPane = new JSplitPane();
-        mSplitPane.setBounds(10, 123 + 50, 854, 527);
-        panelMilestone1.add(mSplitPane);
-
-        mTextAreaOutput = new JTextArea();
-        mTextAreaOutput.setWrapStyleWord(true);
-        mSplitPane.setRightComponent(new JScrollPane(mTextAreaOutput));
-        mSplitPane.setLeftComponent(new JScrollPane(new JTextArea()));
-
         mLablePath = new JLabel("current mDocumentCorpus");
         mLablePath.setBounds(110, 8 + 50, 603, 14);
         panelMilestone1.add(mLablePath);
-
-        mLableInfo = new JLabel("Logs:\n");
-        mLableInfo.setBounds(10, 700 + 50, 603, 14);
-        panelMilestone1.add(mLableInfo);
-
-        JButton buttonReset = new JButton("Reset");
-        buttonReset.setBounds(335 + 265, 90 + 50, 239, 23);
-        panelMilestone1.add(buttonReset);
 
         JButton buttonBrowse = new JButton("Browse");
         buttonBrowse.addActionListener(new ActionListener() {
@@ -153,61 +139,6 @@ public class GUIApplication {
         });
         buttonBrowse.setBounds(699, 4 + 50, 126, 23);
         panelMilestone1.add(buttonBrowse);
-
-        JButton buttonSearch = new JButton("Search");
-        buttonSearch.setBounds(110, 90 + 50, 239, 23);
-        buttonSearch.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                searchClick();
-            }
-        });
-        panelMilestone1.add(buttonSearch);
-
-        JButton buttonVocab = new JButton("Show Vocabulary");
-        buttonVocab.setBounds(110, 90 - 30 + 50, 239, 23);
-        buttonVocab.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-
-                java.util.List<String> vocabList = index.getVocabulary();
-                mTextAreaOutput.setText("");
-                for (int i = 0; i < 1000; i++) {
-
-                    mTextAreaOutput.setText(mTextAreaOutput.getText() + "\n" + vocabList.get(i));
-                }
-            }
-        });
-        panelMilestone1.add(buttonVocab);
-
-
-        JButton buttonStem = new JButton("Stem");
-        buttonStem.setBounds(355, 90 - 30 + 50, 239, 23);
-        buttonStem.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                mTextAreaOutput.setText("");
-                mTextAreaOutput.setText(mTokenProcessor.processToken(mTextFieldQuery.getText().toString()).get(0));
-            }
-        });
-        panelMilestone1.add(buttonStem);
-
-
-        JButton buttonDiskIndex = new JButton("DiskIndex");
-        buttonDiskIndex.setBounds(335 + 265, 90 - 30 + 50, 239, 23);
-        buttonDiskIndex.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-                // Start creating disk index.
-                new DiskIndexWriter(mLablePath.getText() + "\\index").writeIndex(index);
-            }
-        });
-        panelMilestone1.add(buttonDiskIndex);
 
         JButton buttonIndex = new JButton("Index");
         buttonIndex.setBounds(355, 90 + 50, 239, 23);
@@ -238,6 +169,7 @@ public class GUIApplication {
             }
         });
         panelMilestone1.add(buttonIndex);
+
         JButton btnBack = new JButton();
         try {
             Image newimg = ImageIO.read(getClass().getResource("resources/back.png")).getScaledInstance(40, 40, java.awt.Image.SCALE_SMOOTH);
@@ -255,6 +187,93 @@ public class GUIApplication {
                 initlizeMainContent();
             }
         });
+
+        JLabel labelEnterQuery = new JLabel("Enter Query");
+        labelEnterQuery.setBounds(10, 33 + 50, 80, 14);
+        panelMilestone1.add(labelEnterQuery);
+
+        mTextFieldQuery = new JTextField();
+        mTextFieldQuery.setBounds(110, 30 + 50, 788, 25);
+        panelMilestone1.add(mTextFieldQuery);
+        mTextFieldQuery.setColumns(50);
+        
+        mLableInfo = new JLabel("Logs:\n");
+        mLableInfo.setBounds(10, 700 + 50, 603, 14);
+        panelMilestone1.add(mLableInfo);
+
+        JButton buttonReset = new JButton("Reset");
+        buttonReset.setBounds(335 + 265, 90 + 50, 239, 23);
+        panelMilestone1.add(buttonReset);
+
+        if(milestoneNumber == MILESTONE_1) {
+
+
+            mSplitPane = new JSplitPane();
+            mSplitPane.setBounds(10, 123 + 50, 854, 527);
+            panelMilestone1.add(mSplitPane);
+
+            mTextAreaOutput = new JTextArea();
+            mTextAreaOutput.setWrapStyleWord(true);
+            mSplitPane.setRightComponent(new JScrollPane(mTextAreaOutput));
+            mSplitPane.setLeftComponent(new JScrollPane(new JTextArea()));
+
+            JButton buttonSearch = new JButton("Search");
+            buttonSearch.setBounds(110, 90 + 50, 239, 23);
+            buttonSearch.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    searchClick();
+                }
+            });
+            panelMilestone1.add(buttonSearch);
+
+            JButton buttonVocab = new JButton("Show Vocabulary");
+            buttonVocab.setBounds(110, 90 - 30 + 50, 239, 23);
+            buttonVocab.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+
+
+                    java.util.List<String> vocabList = index.getVocabulary();
+                    mTextAreaOutput.setText("");
+                    for (int i = 0; i < 1000; i++) {
+
+                        mTextAreaOutput.setText(mTextAreaOutput.getText() + "\n" + vocabList.get(i));
+                    }
+                }
+            });
+            panelMilestone1.add(buttonVocab);
+
+
+            JButton buttonStem = new JButton("Stem");
+            buttonStem.setBounds(355, 90 - 30 + 50, 239, 23);
+            buttonStem.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    mTextAreaOutput.setText("");
+                    mTextAreaOutput.setText(mTokenProcessor.processToken(mTextFieldQuery.getText().toString()).get(0));
+                }
+            });
+            panelMilestone1.add(buttonStem);
+
+        } else if(milestoneNumber == MILESTONE_2) {
+
+            JButton buttonDiskIndex = new JButton("DiskIndex");
+            buttonDiskIndex.setBounds(335 + 265, 90 - 30 + 50, 239, 23);
+            buttonDiskIndex.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+
+                    // Start creating disk index.
+                    new DiskIndexWriter(mLablePath.getText() + "\\index").writeIndex(index);
+                }
+            });
+            panelMilestone1.add(buttonDiskIndex);
+
+        }
 
         mJFrameMilestone1.setVisible(true);
     }
