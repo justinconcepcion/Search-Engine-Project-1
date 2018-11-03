@@ -25,11 +25,9 @@ public class DiskIndexWriter {
 
         createPostingsBin(index, vocabularyWords, postingsPositions);
 
-
         long[] vocabularyPositions = new long[vocabularyWords.size()];
         // Create vocab.bin and should also return the byte position of each term.
         createVocabBin(vocabularyWords, vocabularyPositions);
-
 
         // Create vocabTable.bin, which will contain both byte positions of postings and term.
         createVocabTableBin(vocabularyPositions, postingsPositions);
@@ -65,12 +63,12 @@ public class DiskIndexWriter {
                     }
                 }
 
-
-                if(i<5) {
-
-                    System.out.println("postings.bin: --------");
-                    System.out.println("Word - "+vocabularyWords.get(i)+" : position - "+postingsPositions[i]);
-                }
+//
+//                if(i<5) {
+//
+//                    System.out.println("postings.bin: --------");
+//                    System.out.println("Word - "+vocabularyWords.get(i)+" : position - "+postingsPositions[i]);
+//                }
             }
 
         } catch (IOException e) {
@@ -105,11 +103,11 @@ public class DiskIndexWriter {
             for (int i = 0; i < vocabularyWords.size(); i++) {
                 String currentWord = vocabularyWords.get(i);
                 vocabularyPositions[i] = currentVocabPosition;
-                if(i<5) {
-
-                    System.out.println("vocab.bin: --------");
-                    System.out.println("Word - "+currentWord+" : position - "+currentVocabPosition);
-                }
+//                if(i<5) {
+//
+//                    System.out.println("vocab.bin: --------");
+//                    System.out.println("Word - "+currentWord+" : position - "+currentVocabPosition);
+//                }
                 dataOutputStream.writeBytes(currentWord);
                 currentVocabPosition = currentVocabPosition + currentWord.length();
 
@@ -143,11 +141,11 @@ public class DiskIndexWriter {
                 dataOutputStream.writeLong(vocabularyPositions[i]);
                 dataOutputStream.writeLong(postingsPositions[i]);
 
-                if(i<5) {
-
-                    System.out.println("vocabTable.bin: --------");
-                    System.out.println("vocabularyPositions - "+vocabularyPositions[i]+" : postingsPositions - "+postingsPositions[i]);
-                }
+//                if(i<5) {
+//
+//                    System.out.println("vocabTable.bin: --------");
+//                    System.out.println("vocabularyPositions - "+vocabularyPositions[i]+" : postingsPositions - "+postingsPositions[i]);
+//                }
             }
 
         } catch (IOException e) {

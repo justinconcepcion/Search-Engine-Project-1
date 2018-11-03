@@ -12,16 +12,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JTree;
+import javax.imageio.ImageIO;
+import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
@@ -39,8 +31,10 @@ import cecs429.text.MultipleTokenProcessor;
 import cecs429.text.PorterTokenProcessor;
 import cecs429.text.TokenStream;
 
-public class GUIApplication extends JFrame {
+public class GUIApplication {
 
+    private JFrame mJFrameMilestone1;
+    private JFrame mJFrameMain;
     private String mExtension;
     private String mSelectedFilename;
 
@@ -57,31 +51,82 @@ public class GUIApplication extends JFrame {
     private Index index;
 
     private GUIApplication() {
-        setTitle("Search Engine");
-        setBounds(new Rectangle(0, 0, 900, 900));
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-        JPanel panel = new JPanel();
-        panel.setBounds(20, 20, 800, 200);
-        getContentPane().add(panel);
-        panel.setLayout(null);
+        initlizeMainContent();
+
+
+    }
+
+    private void initlizeMainContent() {
+
+        mJFrameMain = new JFrame("Search Engine");
+        mJFrameMain.setBounds(new Rectangle(0, 0, 900, 900));
+        mJFrameMain.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+
+        JPanel firstPanel = new JPanel();
+        firstPanel.setLayout(new GridLayout(3, 1, 10, 10));
+        firstPanel.setMaximumSize(new Dimension(600, 200));
+
+        JButton btnMilestone1 = new JButton();
+        btnMilestone1.setText("Milestone 1");
+        btnMilestone1.add(Box.createRigidArea(new Dimension(5, 0)));
+        firstPanel.add(btnMilestone1);
+
+        btnMilestone1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                mJFrameMain.setVisible(false);
+                initializeMilestone1Panel();
+            }
+        });
+
+        JButton btnMilestone2 = new JButton();
+        btnMilestone2.setText("Milestone 2");
+        btnMilestone2.add(Box.createRigidArea(new Dimension(5, 0)));
+        firstPanel.add(btnMilestone2);
+
+        JButton btnMilestone3 = new JButton();
+        btnMilestone3.setText("Milestone 3");
+        btnMilestone3.add(Box.createRigidArea(new Dimension(5, 0)));
+        firstPanel.add(btnMilestone3);
+        mainPanel.add(firstPanel);
+
+        mJFrameMain.setContentPane(mainPanel);
+
+        mJFrameMain.setSize(520, 600);
+        mJFrameMain.setMinimumSize(new Dimension(520, 600));
+        mJFrameMain.setVisible(true);
+    }
+
+    private void initializeMilestone1Panel() {
+        mJFrameMilestone1 = new JFrame("Milestone 1");
+        mJFrameMilestone1.setBounds(new Rectangle(0, 0, 900, 900));
+        mJFrameMilestone1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        JPanel panelMilestone1 = new JPanel();
+        panelMilestone1.setBounds(20, 20, 800, 200);
+        mJFrameMilestone1.getContentPane().add(panelMilestone1);
+        panelMilestone1.setLayout(null);
 
         JLabel lblSelectCorpus = new JLabel("Select Corpus");
-        lblSelectCorpus.setBounds(10, 8, 90, 14);
-        panel.add(lblSelectCorpus);
+        lblSelectCorpus.setBounds(10, 8 + 50, 90, 14);
+        panelMilestone1.add(lblSelectCorpus);
 
         mTextFieldQuery = new JTextField();
-        mTextFieldQuery.setBounds(110, 30, 788, 25);
-        panel.add(mTextFieldQuery);
+        mTextFieldQuery.setBounds(110, 30 + 50, 788, 25);
+        panelMilestone1.add(mTextFieldQuery);
         mTextFieldQuery.setColumns(50);
 
         JLabel labelEnterQuery = new JLabel("Enter Query");
-        labelEnterQuery.setBounds(10, 33, 80, 14);
-        panel.add(labelEnterQuery);
+        labelEnterQuery.setBounds(10, 33 + 50, 80, 14);
+        panelMilestone1.add(labelEnterQuery);
 
         mSplitPane = new JSplitPane();
-        mSplitPane.setBounds(10, 123, 854, 527);
-        panel.add(mSplitPane);
+        mSplitPane.setBounds(10, 123 + 50, 854, 527);
+        panelMilestone1.add(mSplitPane);
 
         mTextAreaOutput = new JTextArea();
         mTextAreaOutput.setWrapStyleWord(true);
@@ -89,30 +134,28 @@ public class GUIApplication extends JFrame {
         mSplitPane.setLeftComponent(new JScrollPane(new JTextArea()));
 
         mLablePath = new JLabel("current mDocumentCorpus");
-        mLablePath.setBounds(110, 8, 603, 14);
-        panel.add(mLablePath);
-        setVisible(true);
+        mLablePath.setBounds(110, 8 + 50, 603, 14);
+        panelMilestone1.add(mLablePath);
 
         mLableInfo = new JLabel("Logs:\n");
-        mLableInfo.setBounds(10, 700, 603, 14);
-        panel.add(mLableInfo);
-        setVisible(true);
+        mLableInfo.setBounds(10, 700 + 50, 603, 14);
+        panelMilestone1.add(mLableInfo);
 
         JButton buttonReset = new JButton("Reset");
-        buttonReset.setBounds(335 + 265, 90, 239, 23);
-        panel.add(buttonReset);
+        buttonReset.setBounds(335 + 265, 90 + 50, 239, 23);
+        panelMilestone1.add(buttonReset);
 
         JButton buttonBrowse = new JButton("Browse");
         buttonBrowse.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
-                chooseDirectory();
+                chooseDirectory(mJFrameMilestone1);
             }
         });
-        buttonBrowse.setBounds(699, 4, 126, 23);
-        panel.add(buttonBrowse);
+        buttonBrowse.setBounds(699, 4 + 50, 126, 23);
+        panelMilestone1.add(buttonBrowse);
 
         JButton buttonSearch = new JButton("Search");
-        buttonSearch.setBounds(110, 90, 239, 23);
+        buttonSearch.setBounds(110, 90 + 50, 239, 23);
         buttonSearch.addActionListener(new ActionListener() {
 
             @Override
@@ -120,10 +163,10 @@ public class GUIApplication extends JFrame {
                 searchClick();
             }
         });
-        panel.add(buttonSearch);
+        panelMilestone1.add(buttonSearch);
 
         JButton buttonVocab = new JButton("Show Vocabulary");
-        buttonVocab.setBounds(110, 90-30, 239, 23);
+        buttonVocab.setBounds(110, 90 - 30 + 50, 239, 23);
         buttonVocab.addActionListener(new ActionListener() {
 
             @Override
@@ -132,17 +175,17 @@ public class GUIApplication extends JFrame {
 
                 java.util.List<String> vocabList = index.getVocabulary();
                 mTextAreaOutput.setText("");
-                for (int i=0;i<1000;i++) {
+                for (int i = 0; i < 1000; i++) {
 
-                    mTextAreaOutput.setText(mTextAreaOutput.getText()+"\n"+vocabList.get(i));
+                    mTextAreaOutput.setText(mTextAreaOutput.getText() + "\n" + vocabList.get(i));
                 }
             }
         });
-        panel.add(buttonVocab);
+        panelMilestone1.add(buttonVocab);
 
 
         JButton buttonStem = new JButton("Stem");
-        buttonStem.setBounds(355, 90-30, 239, 23);
+        buttonStem.setBounds(355, 90 - 30 + 50, 239, 23);
         buttonStem.addActionListener(new ActionListener() {
 
             @Override
@@ -151,23 +194,23 @@ public class GUIApplication extends JFrame {
                 mTextAreaOutput.setText(mTokenProcessor.processToken(mTextFieldQuery.getText().toString()).get(0));
             }
         });
-        panel.add(buttonStem);
+        panelMilestone1.add(buttonStem);
 
 
         JButton buttonDiskIndex = new JButton("DiskIndex");
-        buttonDiskIndex.setBounds(335 + 265, 90-30, 239, 23);
+        buttonDiskIndex.setBounds(335 + 265, 90 - 30 + 50, 239, 23);
         buttonDiskIndex.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
 
                 // Start creating disk index.
-                new DiskIndexWriter( mLablePath.getText()+"\\index").writeIndex(index);
+                new DiskIndexWriter(mLablePath.getText() + "\\index").writeIndex(index);
             }
         });
-        panel.add(buttonDiskIndex);
+        panelMilestone1.add(buttonDiskIndex);
 
         JButton buttonIndex = new JButton("Index");
-        buttonIndex.setBounds(355, 90, 239, 23);
+        buttonIndex.setBounds(355, 90 + 50, 239, 23);
         buttonIndex.addActionListener(new ActionListener() {
 
             @Override
@@ -194,21 +237,38 @@ public class GUIApplication extends JFrame {
 
             }
         });
-        panel.add(buttonIndex);
+        panelMilestone1.add(buttonIndex);
+        JButton btnBack = new JButton();
+        try {
+            Image newimg = ImageIO.read(getClass().getResource("resources/back.png")).getScaledInstance(40, 40, java.awt.Image.SCALE_SMOOTH);
+            btnBack.setIcon(new ImageIcon(newimg));
+        } catch (Exception ex) {
+            System.out.println(ex);
+        }
+        btnBack.setBounds(10, 10, 40, 40);
+        panelMilestone1.add(btnBack);
 
+        btnBack.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mJFrameMilestone1.setVisible(false);
+                initlizeMainContent();
+            }
+        });
 
+        mJFrameMilestone1.setVisible(true);
     }
 
     /**
      * Method to open directory selector and get all files in that folder.
      */
-    private void chooseDirectory() {
+    private void chooseDirectory(JFrame jFrame) {
         JFileChooser chooser = new JFileChooser();
         chooser.setCurrentDirectory(new File("C:\\Users\\KARAN\\Desktop\\Study\\4th Sem\\SET\\Projects\\SearchEngineProject\\MobyDick10Chapters"));
         chooser.setDialogTitle("Select Document Corpus");
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         chooser.setAcceptAllFileFilterUsed(false);
-        if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+        if (chooser.showSaveDialog(jFrame) == JFileChooser.APPROVE_OPTION) {
             mCorpusDirectory = chooser.getSelectedFile();
 
             File[] temp = mCorpusDirectory.listFiles();
