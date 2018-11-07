@@ -69,19 +69,19 @@ public class PositionalInvertedIndexTest {
 	@Test
 	public void testIndexWordOne() {
 
-		Assert.assertArrayEquals(indexTest.getPostings("india").toArray(), index.getPostings("india").toArray());
+		Assert.assertArrayEquals(indexTest.getPostingsWithPositions("india").toArray(), index.getPostingsWithPositions("india").toArray());
 
 	}
 
 	public void testIndexWordTwo() {
 
-		Assert.assertArrayEquals(indexTest.getPostings("to").toArray(), index.getPostings("to").toArray());
+		Assert.assertArrayEquals(indexTest.getPostingsWithPositions("to").toArray(), index.getPostingsWithPositions("to").toArray());
 
 	}
 
 	public void testIndexWordThree() {
 
-		Assert.assertArrayEquals(indexTest.getPostings("play").toArray(), index.getPostings("play").toArray());
+		Assert.assertArrayEquals(indexTest.getPostingsWithPositions("play").toArray(), index.getPostingsWithPositions("play").toArray());
 
 	}
 

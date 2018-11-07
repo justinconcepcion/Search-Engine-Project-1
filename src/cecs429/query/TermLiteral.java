@@ -24,7 +24,7 @@ public class TermLiteral implements QueryComponent {
 	
 	@Override
 	public List<Posting> getPostings(Index index) {
-		return index.getPostings(processor.processToken(mTerm).get(0));
+		return index.getPostingsWithPositions(processor.processToken(mTerm).get(0));
 	}
 	
 	@Override

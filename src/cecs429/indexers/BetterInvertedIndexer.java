@@ -43,7 +43,7 @@ public class BetterInvertedIndexer {
         do {
             System.out.println("Enter the term to search:");
             query = reader.nextLine();
-            for (Posting p : index.getPostings(query)) {
+            for (Posting p : index.getPostingsWithPositions(query)) {
                 System.out.println("Document " + corpus.getDocument(p.getDocumentId()).getTitle());
             }
             System.out.println("Continue ? (Y/N):");

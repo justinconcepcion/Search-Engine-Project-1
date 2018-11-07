@@ -135,7 +135,7 @@ public class TermDocumentIndexer {
 		System.out.println("Add keyword to search: ");
 		String query = reader.nextLine(); // Scans the next token of the input as a string.
 		//once finished
-		List<Posting> postings = index.getPostings(query);
+		List<Posting> postings = index.getPostingsWithPositions(query);
 
 		if (postings.size() != 0) {
 

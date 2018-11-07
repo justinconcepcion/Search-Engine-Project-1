@@ -1,7 +1,6 @@
 package cecs429;
 
 import cecs429.index.Index;
-import cecs429.index.PositionalInvertedIndex;
 import cecs429.index.Posting;
 
 import java.io.*;
@@ -11,7 +10,7 @@ public class DiskIndexWriter {
 
     private String mPath;
 
-    public DiskIndexWriter(String path){
+    public DiskIndexWriter(String path) {
         mPath = path;
     }
 
@@ -41,31 +40,46 @@ public class DiskIndexWriter {
 
             FileOutputStream file = new FileOutputStream(postingsBinFile); // append : false.
             dataOutputStream = new DataOutputStream(file);
-            int currentPostingPosition = 0;
-            for(int i=0;i<vocabularyWords.size();i++) {
+            for (int i = 0; i < vocabularyWords.size(); i++) {
 
-                List<Posting> termPostings = index.getPostings(vocabularyWords.get(i));
+                List<Posting> termPostings = index.getPostingsWithPositions(vocabularyWords.get(i));
 
                 postingsPositions[i] = dataOutputStream.size();
                 // Write dft: doc frequency.
                 dataOutputStream.writeInt(termPostings.size());
 
-                for(int j=0;j<termPostings.size();j++) {
-                    // Write doc id.
-                    dataOutputStream.writeInt(termPostings.get(j).getDocumentId());
+                for (int j = 0; j < termPostings.size(); j++) {
+                    // Write doc id. (with gaps)
+
+                    if (j == 0) {
+                        // If it is first doc, then insert as it is.
+                        dataOutputStream.writeInt(termPostings.get(j).getDocumentId());
+                    } else {
+                        // else insert gap.
+                        dataOutputStream.writeInt(termPostings.get(j).getDocumentId() - termPostings.get(j - 1).getDocumentId());
+                    }
+
+                    // @TODO: Remove comments
+//                    if(vocabularyWords.get(i).equals("whale")) {
+//
+//                        System.out.println("term:  "+vocabularyWords.get(i));
+//                        System.out.println("i: "+i);
+//                        System.out.println("j: "+j);
+//                        System.out.println("original doc ID: --------"+termPostings.get(j).getDocumentId());
+//                        System.out.println("doc ID: --------"+docId);
+//                    }
 
                     // Write term frequency.
                     dataOutputStream.writeInt(termPostings.get(j).getPositions().size());
 
                     // Write positions.
-                    for(int k=0;k<termPostings.get(j).getPositions().size();k++) {
+                    for (int k = 0; k < termPostings.get(j).getPositions().size(); k++) {
                         dataOutputStream.writeInt(termPostings.get(j).getPositions().get(k));
                     }
                 }
 
-//
+                // @TODO: Remove comments
 //                if(i<5) {
-//
 //                    System.out.println("postings.bin: --------");
 //                    System.out.println("Word - "+vocabularyWords.get(i)+" : position - "+postingsPositions[i]);
 //                }
@@ -83,13 +97,6 @@ public class DiskIndexWriter {
 
     }
 
-    private void closeDataOutputStream(DataOutputStream dataOutputStream) throws IOException {
-        if (dataOutputStream != null) {
-            dataOutputStream.flush();
-            dataOutputStream.close();
-        }
-    }
-
     private void createVocabBin(List<String> vocabularyWords, long[] vocabularyPositions) {
         DataOutputStream dataOutputStream = null;
         try {
@@ -103,6 +110,7 @@ public class DiskIndexWriter {
             for (int i = 0; i < vocabularyWords.size(); i++) {
                 String currentWord = vocabularyWords.get(i);
                 vocabularyPositions[i] = currentVocabPosition;
+                // @TODO: Remove comments
 //                if(i<5) {
 //
 //                    System.out.println("vocab.bin: --------");
@@ -127,7 +135,6 @@ public class DiskIndexWriter {
     }
 
 
-
     private void createVocabTableBin(long[] vocabularyPositions, long[] postingsPositions) {
         DataOutputStream dataOutputStream = null;
         try {
@@ -137,10 +144,16 @@ public class DiskIndexWriter {
             FileOutputStream file = new FileOutputStream(vocabBinFile); // append : false.
             dataOutputStream = new DataOutputStream(file);
 
-            for(int i=0;i<vocabularyPositions.length;i++) {
+            for (int i = 0; i < vocabularyPositions.length; i++) {
                 dataOutputStream.writeLong(vocabularyPositions[i]);
                 dataOutputStream.writeLong(postingsPositions[i]);
 
+                if(i<5) {
+
+                    System.out.println("size: vocabtable "+dataOutputStream.size()/8);
+                }
+
+                // @TODO: Remove comments
 //                if(i<5) {
 //
 //                    System.out.println("vocabTable.bin: --------");
@@ -156,6 +169,40 @@ public class DiskIndexWriter {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+
+    void writeLDToDocWeights(double ld) {
+
+        DataOutputStream dataOutputStream = null;
+
+        try {
+            File postingsBinFile = new File(mPath + File.separator + "docWeights.bin");
+            postingsBinFile.getParentFile().mkdirs(); // Create folders if does not exist.
+            FileOutputStream file = null;
+            file = new FileOutputStream(postingsBinFile, true);
+            dataOutputStream = new DataOutputStream(file);
+
+            dataOutputStream.writeDouble(ld);
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                closeDataOutputStream(dataOutputStream);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void closeDataOutputStream(DataOutputStream dataOutputStream) throws IOException {
+        if (dataOutputStream != null) {
+            dataOutputStream.flush();
+            dataOutputStream.close();
         }
     }
 

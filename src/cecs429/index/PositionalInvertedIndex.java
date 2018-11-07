@@ -19,12 +19,17 @@ public class PositionalInvertedIndex implements Index {
     }
 
     @Override
-    public List<Posting> getPostings(String term) {
+    public List<Posting> getPostingsWithPositions(String term) {
         List<Posting> temp = new ArrayList<>();
         if (mAdjacencyList.containsKey(term)) {
             return mAdjacencyList.get(term);
         }
         return temp;
+    }
+
+    @Override
+    public List<Posting> getPostingsWithoutPositions(String term) {
+        return null;
     }
 
     @Override

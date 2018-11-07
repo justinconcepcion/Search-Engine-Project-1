@@ -35,9 +35,9 @@ public class PhraseLiteral implements QueryComponent {
     public List<Posting> getPostings(Index index) {
         List<Posting> results = new ArrayList<>();
 
-        results = index.getPostings(multipleTokenProcessor.processToken(mTerms.get(0)).get(0));
+        results = index.getPostingsWithPositions(multipleTokenProcessor.processToken(mTerms.get(0)).get(0));
         for (int i = 1; i < mTerms.size(); i++) {
-            List<Posting> secondList = index.getPostings(multipleTokenProcessor.processToken(mTerms.get(i)).get(0));
+            List<Posting> secondList = index.getPostingsWithPositions(multipleTokenProcessor.processToken(mTerms.get(i)).get(0));
 
             results = positionalIntersect(results, secondList);
         }

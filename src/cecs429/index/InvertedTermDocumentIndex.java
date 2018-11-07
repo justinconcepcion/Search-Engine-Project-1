@@ -16,13 +16,18 @@ public class InvertedTermDocumentIndex implements Index {
     }
 
     @Override
-    public List<Posting> getPostings(String term) {
+    public List<Posting> getPostingsWithPositions(String term) {
         // TODO Auto-generated method stub
         List<Posting> temp = new ArrayList<>();
         if (mAdjacencyList.containsKey(term)) {
             return mAdjacencyList.get(term);
         } else
             return temp;
+    }
+
+    @Override
+    public List<Posting> getPostingsWithoutPositions(String term) {
+        return null;
     }
 
     @Override

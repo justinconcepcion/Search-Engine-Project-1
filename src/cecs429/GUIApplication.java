@@ -5,10 +5,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.*;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
@@ -20,6 +19,7 @@ import cecs429.documents.DirectoryCorpus;
 import cecs429.documents.Document;
 import cecs429.documents.DocumentCorpus;
 import cecs429.documents.JsonFileDocument;
+import cecs429.index.DiskPositionalIndex;
 import cecs429.index.Index;
 import cecs429.index.PositionalInvertedIndex;
 import cecs429.index.Posting;
@@ -140,35 +140,6 @@ public class GUIApplication {
         buttonBrowse.setBounds(699, 4 + 50, 126, 23);
         panelMilestone1.add(buttonBrowse);
 
-        JButton buttonIndex = new JButton("Index");
-        buttonIndex.setBounds(355, 90 + 50, 239, 23);
-        buttonIndex.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-                // After clicking index button, get current time before indexing and get time after indexing.
-                long startTime = System.currentTimeMillis();
-                if (mExtension.equalsIgnoreCase(".txt")) {
-                    mDocumentCorpus = DirectoryCorpus.loadTextDirectory(Paths.get(mCorpusDirectory.getAbsolutePath()).toAbsolutePath(),
-                            mExtension);
-                } else {
-                    mDocumentCorpus = DirectoryCorpus.loadJsonDirectory(Paths.get(mCorpusDirectory.getAbsolutePath()).toAbsolutePath(),
-                            mExtension);
-
-                }
-                mTokenProcessor = new PorterTokenProcessor();
-
-                index = indexCorpus(mDocumentCorpus, mTokenProcessor);
-                long stopTime = System.currentTimeMillis();
-
-                // Calculating total time taken for indexing.
-                long elapsedTime = stopTime - startTime;
-                mLableInfo.setText(mLableInfo.getText() + "\nDone Indexing." + "\n\nTime to index = " + TimeUnit.MILLISECONDS.toSeconds(elapsedTime) + " seconds");
-
-            }
-        });
-        panelMilestone1.add(buttonIndex);
 
         JButton btnBack = new JButton();
         try {
@@ -196,7 +167,7 @@ public class GUIApplication {
         mTextFieldQuery.setBounds(110, 30 + 50, 788, 25);
         panelMilestone1.add(mTextFieldQuery);
         mTextFieldQuery.setColumns(50);
-        
+
         mLableInfo = new JLabel("Logs:\n");
         mLableInfo.setBounds(10, 700 + 50, 603, 14);
         panelMilestone1.add(mLableInfo);
@@ -205,8 +176,37 @@ public class GUIApplication {
         buttonReset.setBounds(335 + 265, 90 + 50, 239, 23);
         panelMilestone1.add(buttonReset);
 
-        if(milestoneNumber == MILESTONE_1) {
+        if (milestoneNumber == MILESTONE_1) {
 
+            JButton buttonIndex = new JButton("Index");
+            buttonIndex.setBounds(355, 90 + 50, 239, 23);
+            buttonIndex.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+
+                    // After clicking index button, get current time before indexing and get time after indexing.
+                    long startTime = System.currentTimeMillis();
+                    if (mExtension.equalsIgnoreCase(".txt")) {
+                        mDocumentCorpus = DirectoryCorpus.loadTextDirectory(Paths.get(mCorpusDirectory.getAbsolutePath()).toAbsolutePath(),
+                                mExtension);
+                    } else {
+                        mDocumentCorpus = DirectoryCorpus.loadJsonDirectory(Paths.get(mCorpusDirectory.getAbsolutePath()).toAbsolutePath(),
+                                mExtension);
+
+                    }
+                    mTokenProcessor = new PorterTokenProcessor();
+
+                    index = indexCorpus(mDocumentCorpus, mTokenProcessor);
+                    long stopTime = System.currentTimeMillis();
+
+                    // Calculating total time taken for indexing.
+                    long elapsedTime = stopTime - startTime;
+                    mLableInfo.setText(mLableInfo.getText() + "\nDone Indexing." + "\n\nTime to index = " + TimeUnit.MILLISECONDS.toSeconds(elapsedTime) + " seconds");
+
+                }
+            });
+            panelMilestone1.add(buttonIndex);
 
             mSplitPane = new JSplitPane();
             mSplitPane.setBounds(10, 123 + 50, 854, 527);
@@ -223,7 +223,7 @@ public class GUIApplication {
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    searchClick();
+                    searchClick(MILESTONE_1);
                 }
             });
             panelMilestone1.add(buttonSearch);
@@ -242,6 +242,7 @@ public class GUIApplication {
 
                         mTextAreaOutput.setText(mTextAreaOutput.getText() + "\n" + vocabList.get(i));
                     }
+//                    mTextAreaOutput.setText(vocabList.size()+"");
                 }
             });
             panelMilestone1.add(buttonVocab);
@@ -259,7 +260,7 @@ public class GUIApplication {
             });
             panelMilestone1.add(buttonStem);
 
-        } else if(milestoneNumber == MILESTONE_2) {
+        } else if (milestoneNumber == MILESTONE_2) {
 
             JButton buttonDiskIndex = new JButton("DiskIndex");
             buttonDiskIndex.setBounds(335 + 265, 90 - 30 + 50, 239, 23);
@@ -267,11 +268,51 @@ public class GUIApplication {
                 @Override
                 public void actionPerformed(ActionEvent e) {
 
+                    // After clicking index button, get current time before indexing and get time after indexing.
+                    long startTime = System.currentTimeMillis();
+                    if (mExtension.equalsIgnoreCase(".txt")) {
+                        mDocumentCorpus = DirectoryCorpus.loadTextDirectory(Paths.get(mCorpusDirectory.getAbsolutePath()).toAbsolutePath(),
+                                mExtension);
+                    } else {
+                        mDocumentCorpus = DirectoryCorpus.loadJsonDirectory(Paths.get(mCorpusDirectory.getAbsolutePath()).toAbsolutePath(),
+                                mExtension);
+
+                    }
+                    mTokenProcessor = new PorterTokenProcessor();
+
+                    index = indexCorpus(mDocumentCorpus, mTokenProcessor);
+                    long stopTime = System.currentTimeMillis();
+
+                    // Calculating total time taken for indexing.
+                    long elapsedTime = stopTime - startTime;
+                    mLableInfo.setText(mLableInfo.getText() + "\nDone Indexing." + "\n\nTime to index = " + TimeUnit.MILLISECONDS.toSeconds(elapsedTime) + " seconds");
+
                     // Start creating disk index.
                     new DiskIndexWriter(mLablePath.getText() + "\\index").writeIndex(index);
                 }
             });
             panelMilestone1.add(buttonDiskIndex);
+
+
+            mSplitPane = new JSplitPane();
+            mSplitPane.setBounds(10, 123 + 50, 854, 527);
+            panelMilestone1.add(mSplitPane);
+
+            mTextAreaOutput = new JTextArea();
+            mTextAreaOutput.setWrapStyleWord(true);
+            mSplitPane.setRightComponent(new JScrollPane(mTextAreaOutput));
+            mSplitPane.setLeftComponent(new JScrollPane(new JTextArea()));
+
+            JButton btnSearchDiskIndex = new JButton("SearchFromDiskIndex");
+            btnSearchDiskIndex.setBounds(335, 90 - 30 + 50, 239, 23);
+            btnSearchDiskIndex.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+
+                    searchClick(MILESTONE_2);
+                }
+            });
+            panelMilestone1.add(btnSearchDiskIndex);
 
         }
 
@@ -304,18 +345,30 @@ public class GUIApplication {
     /**
      * Start parsing the query using Boolean Query parser.
      */
-    private void searchClick() {
+    private void searchClick(int milestoneNumber) {
 
         DefaultMutableTreeNode top = new DefaultMutableTreeNode(mCorpusDirectory.getName());
 
         String query = mTextFieldQuery.getText();
-        QueryComponent temp = new BooleanQueryParser(mTokenProcessor).parseQuery(query);
-        for (Posting p : temp.getPostings(index)) {
-            DefaultMutableTreeNode tempTreeNode;
-            tempTreeNode = new DefaultMutableTreeNode(mDocumentCorpus.getDocument(p.getDocumentId()).getTitle());
-            top.add(tempTreeNode);
+        if(milestoneNumber == MILESTONE_1) {
 
+            QueryComponent temp = new BooleanQueryParser(mTokenProcessor).parseQuery(query);
+            for (Posting p : temp.getPostings(index)) {
+                DefaultMutableTreeNode tempTreeNode;
+                tempTreeNode = new DefaultMutableTreeNode(mDocumentCorpus.getDocument(p.getDocumentId()).getTitle());
+                top.add(tempTreeNode);
+            }
+        } else if(milestoneNumber == MILESTONE_2){
+
+            java.util.List<Posting> postings = new DiskPositionalIndex(mLablePath.getText() + "\\index").getPostingsWithPositions(mTextFieldQuery.getText());
+
+            for (int i=0;i<postings.size();i++) {
+                DefaultMutableTreeNode tempTreeNode;
+                tempTreeNode = new DefaultMutableTreeNode(mDocumentCorpus.getDocument(postings.get(i).getDocumentId()).getTitle());
+                top.add(tempTreeNode);
+            }
         }
+
         mLableInfo.setText("Logs: " + "\n\nTotal documents:" + top.getChildCount());
 
         mTree = new JTree(top);
@@ -347,11 +400,14 @@ public class GUIApplication {
 
     }
 
-    private static Index indexCorpus(DocumentCorpus corpus, MultipleTokenProcessor processor) {
+    private Index indexCorpus(DocumentCorpus corpus, MultipleTokenProcessor processor) {
 
         TokenStream tokenStream;
         PositionalInvertedIndex index = new PositionalInvertedIndex();
         for (Document d : corpus.getDocuments()) {
+
+            HashMap<String, Integer> hashMapTFtd = new HashMap<>();
+
             try {
                 int position = 0;
                 tokenStream = new EnglishTokenStream(d.getContent());
@@ -359,19 +415,49 @@ public class GUIApplication {
                 for (String str : iterableOfTokens) {
 
                     for (String indexTerm : processor.processToken(str)) {
+
                         if (!indexTerm.trim().equals("")) {
                             index.addTerm(indexTerm, d.getId(), position);
+                            addToHashMapTFtd(hashMapTFtd, indexTerm);
                         }
                     }
                     position++;
                 }
                 tokenStream.close();
+
+
+                double ld = calculateLdForDoc(hashMapTFtd);
+                new DiskIndexWriter(mLablePath.getText() + "\\index").writeLDToDocWeights(ld);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
         return index;
+    }
+
+
+    private double calculateLdForDoc(HashMap<String, Integer> hashMapTFtd) {
+
+        double ld = 0;
+        for (int tftd : hashMapTFtd.values()) {
+
+            double wt = 1 + Math.log(tftd);
+            ld += wt * wt;
+        }
+        return Math.sqrt(ld);
+
+    }
+
+    /*
+    This method adds or updated TFtd hashmap, which will be used to calculate document weights.
+     */
+    private void addToHashMapTFtd(HashMap<String, Integer> hashMapTFtd, String indexTerm) {
+        if (hashMapTFtd.containsKey(indexTerm)) {
+            hashMapTFtd.put(indexTerm, hashMapTFtd.get(indexTerm) + 1);
+        } else {
+            hashMapTFtd.put(indexTerm, 1);
+        }
     }
 
     public static void main(String[] args) {

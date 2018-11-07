@@ -39,7 +39,7 @@ public class TermDocumentIndex implements Index {
     }
 
     @Override
-    public List<Posting> getPostings(String term) {
+    public List<Posting> getPostingsWithPositions(String term) {
         List<Posting> results = new ArrayList<>();
 
         // TODO: implement this method.
@@ -63,6 +63,11 @@ public class TermDocumentIndex implements Index {
         }
 
         return results;
+    }
+
+    @Override
+    public List<Posting> getPostingsWithoutPositions(String term) {
+        return null;
     }
 
     public List<String> getVocabulary() {

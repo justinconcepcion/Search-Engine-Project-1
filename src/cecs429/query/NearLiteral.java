@@ -25,8 +25,8 @@ public class NearLiteral implements QueryComponent {
     public List<Posting> getPostings(Index index) {
         List<Posting> results = new ArrayList<>();
 
-        results.addAll(index.getPostings(mProcessor.processToken(mFirstToken).get(0)));
-        results = positionalIntersect(results, index.getPostings(mProcessor.processToken(mSecondToken).get(0)));
+        results.addAll(index.getPostingsWithPositions(mProcessor.processToken(mFirstToken).get(0)));
+        results = positionalIntersect(results, index.getPostingsWithPositions(mProcessor.processToken(mSecondToken).get(0)));
         return results;
     }
 

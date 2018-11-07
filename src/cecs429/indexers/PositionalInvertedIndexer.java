@@ -30,7 +30,7 @@ public class PositionalInvertedIndexer {
 		do {
 			System.out.println("Enter the term to search:");
 			query = reader.nextLine();
-			for (Posting p : index.getPostings(query)) {
+			for (Posting p : index.getPostingsWithPositions(query)) {
 				System.out.print("Document " + corpus.getDocument(p.getDocumentId()).getTitle());
 				System.out.print(", Postions: ");
 				for(int i=0;i<p.getPositions().size();i++) {
