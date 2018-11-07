@@ -173,7 +173,7 @@ public class DiskIndexWriter {
     }
 
 
-    void writeLDToDocWeights(double ld) {
+    void writeLDToDocWeights(List<Double> ld) {
 
         DataOutputStream dataOutputStream = null;
 
@@ -184,7 +184,10 @@ public class DiskIndexWriter {
             file = new FileOutputStream(postingsBinFile, true);
             dataOutputStream = new DataOutputStream(file);
 
-            dataOutputStream.writeDouble(ld);
+            for (Double aLd : ld) {
+
+                dataOutputStream.writeDouble(aLd);
+            }
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
