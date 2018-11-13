@@ -1,6 +1,11 @@
 package cecs429;
 
+import jdbm.PrimaryTreeMap;
+import jdbm.RecordManager;
+import jdbm.RecordManagerFactory;
+
 import java.awt.*;
+import java.io.IOException;
 
 import javax.swing.*;
 
@@ -62,6 +67,8 @@ public class GUIApplication extends JFrame{
         setSize(520, 600);
         setMinimumSize(new Dimension(520, 600));
         setVisible(true);
+
+
     }
 
     public static void main(String[] args) {

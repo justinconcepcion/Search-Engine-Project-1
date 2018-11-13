@@ -2,6 +2,9 @@ package cecs429;
 
 import cecs429.index.Index;
 import cecs429.index.Posting;
+import jdbm.PrimaryTreeMap;
+import jdbm.RecordManager;
+import jdbm.RecordManagerFactory;
 
 import java.io.*;
 import java.util.List;
@@ -29,7 +32,42 @@ public class DiskIndexWriter {
         createVocabBin(vocabularyWords, vocabularyPositions);
 
         // Create vocabTable.bin, which will contain both byte positions of postings and term.
-        createVocabTableBin(vocabularyPositions, postingsPositions);
+//        createVocabTableBin(vocabularyPositions, postingsPositions);
+
+        createBPlusTree(vocabularyWords, postingsPositions);
+    }
+
+    private void createBPlusTree(List<String> vocabularyWords, long[] postingsPositions) {
+        /** create (or open existing) database */
+
+        File bPlusTreeFile = new File(mPath + File.separator + "bplusttree" + File.separator + "SET_BPlusTree");
+        bPlusTreeFile.getParentFile().mkdirs(); // Create folders if does not exist.
+        String fileName = bPlusTreeFile.getPath();
+        RecordManager recMan = null;
+        try {
+            recMan = RecordManagerFactory.createRecordManager(fileName);
+
+            /** Creates TreeMap which stores data in database.
+             *  Constructor method takes recordName (something like SQL table name)*/
+            String recordName = "firstTreeMap";
+            PrimaryTreeMap<String,Long> treeMap = recMan.treeMap(recordName);
+
+            /** add some stuff to map*/
+            for (int i = 0;i<vocabularyWords.size();i++) {
+                treeMap.put(vocabularyWords.get(i), postingsPositions[i]);
+            }
+
+            System.out.println(treeMap.keySet());
+            // > [1, 2, 3]
+
+            /** Map changes are not persisted yet, commit them (save to disk) */
+            recMan.commit();
+
+            /** close record manager */
+            recMan.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void createPostingsBin(Index index, List<String> vocabularyWords, long[] postingsPositions) {
@@ -136,6 +174,7 @@ public class DiskIndexWriter {
 
 
     private void createVocabTableBin(long[] vocabularyPositions, long[] postingsPositions) {
+
         DataOutputStream dataOutputStream = null;
         try {
             File vocabBinFile = new File(mPath + File.separator + "vocabTable.bin");

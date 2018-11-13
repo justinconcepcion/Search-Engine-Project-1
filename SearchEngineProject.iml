@@ -33,5 +33,6 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="junit-4.10" level="project" />
+    <orderEntry type="library" name="jdbm-2.4" level="project" />
   </component>
 </module>

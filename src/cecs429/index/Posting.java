@@ -8,6 +8,7 @@ import java.util.List;
  * A Posting encapulates a document ID associated with a search query component.
  */
 public class Posting {
+    private int mTftd;
     private int mDocumentId;
     private List<Integer> mPositions;
 
@@ -61,5 +62,13 @@ public class Posting {
     @Override
     public int hashCode() {
         return mDocumentId * 13;
+    }
+
+    public int getTftd() {
+        return mTftd;
+    }
+
+    public void setTftd(int mTftd) {
+        this.mTftd = mTftd;
     }
 }

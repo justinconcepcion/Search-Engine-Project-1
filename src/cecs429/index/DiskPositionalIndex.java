@@ -1,5 +1,9 @@
 package cecs429.index;
 
+import jdbm.PrimaryTreeMap;
+import jdbm.RecordManager;
+import jdbm.RecordManagerFactory;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,13 +15,18 @@ public class DiskPositionalIndex implements Index {
     private RandomAccessFile mPostingsFile;
     private RandomAccessFile mVocabFile;
 
+    // @TODO: Ask professor, if reading docWeights file here is ok?
+    private RandomAccessFile mDocWeightsFile;
+
     public DiskPositionalIndex(String path) {
 
         mPath = path;
         try {
-            mVocabTableFile = new RandomAccessFile(new File(mPath + File.separator + "vocabTable.bin"), "r");
+
+//            mVocabTableFile = new RandomAccessFile(new File(mPath + File.separator + "vocabTable.bin"), "r");
             mPostingsFile = new RandomAccessFile(new File(mPath + File.separator + "postings.bin"), "r");
             mVocabFile = new RandomAccessFile(new File(mPath + File.separator + "vocab.bin"), "r");
+            mDocWeightsFile = new RandomAccessFile(new File(mPath + File.separator + "docWeights.bin"), "r");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -29,6 +38,7 @@ public class DiskPositionalIndex implements Index {
 
         long bytePostionOfPosting = getBytePositionFromVocabTable(term);
 
+        System.out.println("position of a term : " + bytePostionOfPosting);
         // Get postings From ByteLocation.
         if(bytePostionOfPosting!=-1) {
 
@@ -70,17 +80,18 @@ public class DiskPositionalIndex implements Index {
                     docId += postingList.get(postingList.size()-1).getDocumentId();
                 }
                 Posting newPosting = new Posting(docId);
-                System.out.println("docId: "+docId);
+//                System.out.println("docId: "+docId);
                 // Term frequency loop.
                 int tftd = mPostingsFile.readInt();
+                newPosting.setTftd(tftd);
 
-                System.out.println("tftd: "+tftd);
+//                System.out.println("tftd: "+tftd);
                 if(withPositions) {
 
                     for(int j=0;j<tftd;j++) {
                         int position = mPostingsFile.readInt();
                         newPosting.addPosition(position);
-                        System.out.println("position: "+position);
+//                        System.out.println("position: "+position);
                     }
                 } else {
                     // If its without postings then, seek directly to the next postings.
@@ -98,17 +109,45 @@ public class DiskPositionalIndex implements Index {
     }
 
     private long getBytePositionFromVocabTable(String term) {
-        // Binary Search vocabTable to locate postings.
+
+        RecordManager recMan = null;
         try {
+            recMan = RecordManagerFactory.createRecordManager(mPath + File.separator + "bplusttree" + File.separator + "SET_BPlusTree");
 
-            long l = 0;
-            // Get length considering -byte integers stored. Jump to middle one
-            long r = mVocabTableFile.length() / 16;
+            /** Creates TreeMap which stores data in database.
+             *  Constructor method takes recordName (something like SQL table name)*/
+            String recordName = "firstTreeMap";
+            PrimaryTreeMap<String,Long> treeMap = recMan.treeMap(recordName);
 
-            return binarySearch(l, r, term);
+            System.out.println(treeMap.keySet());
+            // > [1, 2, 3]
+
+            long postingsLocation = treeMap.get(term);
+
+            /** close record manager */
+            recMan.close();
+
+            return postingsLocation;
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+
+
+
+        // @TODO: Binary search. Above is the B Plus Tree implementation.
+
+//         Binary Search vocabTable to locate postings.
+//        try {
+//
+//            long l = 0;
+//            // Get length considering -byte integers stored. Jump to middle one
+//            long r = mVocabTableFile.length() / 16;
+//
+//            return binarySearch(l, r, term);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
 
         return -1;
@@ -183,5 +222,18 @@ public class DiskPositionalIndex implements Index {
     @Override
     public List<String> getVocabulary() {
         return null;
+    }
+
+
+    public double getLd(Integer docId) {
+
+        try {
+            mDocWeightsFile.seek(docId*8*4);
+            return mDocWeightsFile.readDouble();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return -1;
     }
 }

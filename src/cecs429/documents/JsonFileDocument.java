@@ -1,8 +1,6 @@
 package cecs429.documents;
 
-import java.io.BufferedReader;
-import java.io.Reader;
-import java.io.StringReader;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -27,6 +25,11 @@ public class JsonFileDocument implements FileDocument {
     @Override
     public int getId() {
         return mDocumentId;
+    }
+
+    @Override
+    public long getSize() {
+        return new File(mFilePath.toString()).length();
     }
 
     @Override

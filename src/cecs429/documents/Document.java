@@ -11,6 +11,8 @@ public interface Document {
      */
     int getId();
 
+    long getSize();
+
     /**
      * Gets a stream over the content of the document.
      */
