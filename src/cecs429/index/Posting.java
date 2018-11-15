@@ -11,10 +11,16 @@ public class Posting {
     private int mTftd;
     private int mDocumentId;
     private List<Integer> mPositions;
+    private float mAccumScore;
 
     public Posting(int documentId) {
         mDocumentId = documentId;
         mPositions = new ArrayList<>();
+    }
+
+    public Posting(int documentId, float accumScore) {
+        mDocumentId = documentId;
+        mAccumScore = accumScore;
     }
 
     /**
@@ -70,5 +76,13 @@ public class Posting {
 
     public void setTftd(int mTftd) {
         this.mTftd = mTftd;
+    }
+
+    public float getmAccumScore() {
+        return mAccumScore;
+    }
+
+    public void setmAccumScore(float mAccumScore) {
+        this.mAccumScore = mAccumScore;
     }
 }

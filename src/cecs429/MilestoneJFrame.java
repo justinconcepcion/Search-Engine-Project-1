@@ -331,8 +331,10 @@ class MilestoneJFrame extends JFrame {
 
             mBtnSearchDiskIndex.setEnabled(true);
             mTfIdfVariants.setEnabled(true);
+//            new DiskPositionalIndex(mLablePath.getText()+"\\index").readAllLDs();
         }
         mButtonReset.setEnabled(true);
+
     }
 
 
@@ -368,11 +370,28 @@ class MilestoneJFrame extends JFrame {
                 hashMapTerms.put(term, postings);
             }
 
-            List<Posting> resultPostings = new RankedQueryParser().getRankedDocuments(hashMapTerms, mDocumentCorpus.getCorpusSize(), mLablePath.getText() + "\\index");
+            VariantMethodsInterface variant = null;
+            switch (mTfIdfVariants.getSelectedIndex()) {
+                case 1:
+                    variant = new TFIDFVariant(mLablePath.getText() + "\\index");
+                    break;
+                case 2:
+                    variant = new OkapiVariant(mLablePath.getText() + "\\index");
+                    break;
+                case 3:
+                    variant = new WackyVariant(mLablePath.getText() + "\\index");
+                    break;
+                default:
+                    variant = new DefaultVariant(mLablePath.getText() + "\\index");
+                    System.out.println("Default variant");
+
+            }
+
+            List<Posting> resultPostings = new RankedQueryParser().getRankedDocuments(hashMapTerms, mDocumentCorpus.getCorpusSize(), variant);
 
             for (Posting posting : resultPostings) {
                 DefaultMutableTreeNode tempTreeNode;
-                tempTreeNode = new DefaultMutableTreeNode(mDocumentCorpus.getDocument(posting.getDocumentId()).getTitle());
+                tempTreeNode = new DefaultMutableTreeNode(mDocumentCorpus.getDocument(posting.getDocumentId()).getTitle()+" (ID "+posting.getDocumentId()+"): "+posting.getmAccumScore());
                 top.add(tempTreeNode);
             }
         }
@@ -420,12 +439,6 @@ class MilestoneJFrame extends JFrame {
         // We will calculate LD, docLength, Bytesize and ave(tftd) for all docs and insert in a same list which will be passed
         // to the writer to write it to DocWeights.
         java.util.List<Double> listForDocWeightsFile = new ArrayList<>();
-        // TODO :
-        // TODO : // TODO : // TODO : // TODO : // TODO : // TODO :
-        // TODO : // TODO : // TODO : // TODO :
-        // TODO : // TODO : // TODO : // TODO : // TODO :
-        // TODO : // TODO : // TODO : // TODO : // TODO :
-        // TODO : // TODO : // TODO : // TODO : You left here. Calculate LD, docLength, byteSize, ave(tftd) and insert into docWeights. We are doing this for variant.
 
         double avgDocsLength = 0;
         for (Document d : corpus.getDocuments()) {
@@ -448,10 +461,11 @@ class MilestoneJFrame extends JFrame {
                     position++;
                 }
                 tokenStream.close();
+
                 Double ldForDoc = calculateLdForDoc(hashMapTFtd);
-                Double docLengthd = (double)position - 1;
-                Double byteSized = (double)d.getSize();
-                Double avgTftd = docLengthd/hashMapTFtd.size();
+                Double docLengthd = (double) position - 1.0;
+                Double byteSized = (double) d.getSize();
+                Double avgTftd = docLengthd / (double) hashMapTFtd.size();
 
                 listForDocWeightsFile.add(ldForDoc);
                 listForDocWeightsFile.add(docLengthd);
@@ -466,7 +480,7 @@ class MilestoneJFrame extends JFrame {
             }
         }
 
-        avgDocsLength = avgDocsLength/corpus.getCorpusSize();
+        avgDocsLength = avgDocsLength / corpus.getCorpusSize();
 
         // Add docLengthA, i.e. the average number of tokens on all the docs at last
         listForDocWeightsFile.add(avgDocsLength);
@@ -491,10 +505,10 @@ class MilestoneJFrame extends JFrame {
      */
     private double calculateLdForDoc(HashMap<String, Integer> hashMapTFtd) {
 
-        double ld = 0;
+        double ld = 0.0;
         for (int tftd : hashMapTFtd.values()) {
 
-            double wt = 1 + Math.log(tftd);
+            double wt = 1.0 + Math.log((double) tftd);
             ld += wt * wt;
         }
         return Math.sqrt(ld);

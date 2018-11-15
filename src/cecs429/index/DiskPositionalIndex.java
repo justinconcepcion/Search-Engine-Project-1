@@ -40,7 +40,7 @@ public class DiskPositionalIndex implements Index {
 
         System.out.println("position of a term : " + bytePostionOfPosting);
         // Get postings From ByteLocation.
-        if(bytePostionOfPosting!=-1) {
+        if (bytePostionOfPosting != -1) {
 
             return getPostingsFromByteLocation(bytePostionOfPosting, true);
         }
@@ -55,7 +55,7 @@ public class DiskPositionalIndex implements Index {
         long bytePostionOfPosting = getBytePositionFromVocabTable(term);
 
         // Get postings From ByteLocation.
-        if(bytePostionOfPosting!=-1) {
+        if (bytePostionOfPosting != -1) {
 
             return getPostingsFromByteLocation(bytePostionOfPosting, false);
         }
@@ -71,13 +71,13 @@ public class DiskPositionalIndex implements Index {
             int dft = mPostingsFile.readInt();
 
             // @TODO: Remove Sysouts
-            System.out.println("dft: "+dft);
-            for(int i=0;i<dft;i++) {
+            System.out.println("dft: " + dft);
+            for (int i = 0; i < dft; i++) {
 
                 int docId = mPostingsFile.readInt();
                 // Add gaps to the doc ID if its not the first doc.
-                if(i!=0) {
-                    docId += postingList.get(postingList.size()-1).getDocumentId();
+                if (i != 0) {
+                    docId += postingList.get(postingList.size() - 1).getDocumentId();
                 }
                 Posting newPosting = new Posting(docId);
 //                System.out.println("docId: "+docId);
@@ -86,9 +86,9 @@ public class DiskPositionalIndex implements Index {
                 newPosting.setTftd(tftd);
 
 //                System.out.println("tftd: "+tftd);
-                if(withPositions) {
+                if (withPositions) {
 
-                    for(int j=0;j<tftd;j++) {
+                    for (int j = 0; j < tftd; j++) {
                         int position = mPostingsFile.readInt();
                         newPosting.addPosition(position);
 //                        System.out.println("position: "+position);
@@ -117,7 +117,7 @@ public class DiskPositionalIndex implements Index {
             /** Creates TreeMap which stores data in database.
              *  Constructor method takes recordName (something like SQL table name)*/
             String recordName = "firstTreeMap";
-            PrimaryTreeMap<String,Long> treeMap = recMan.treeMap(recordName);
+            PrimaryTreeMap<String, Long> treeMap = recMan.treeMap(recordName);
 
             System.out.println(treeMap.keySet());
             // > [1, 2, 3]
@@ -131,8 +131,6 @@ public class DiskPositionalIndex implements Index {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
 
 
         // @TODO: Binary search. Above is the B Plus Tree implementation.
@@ -224,11 +222,71 @@ public class DiskPositionalIndex implements Index {
         return null;
     }
 
+    public void readAllLDs() {
+        for(int i=0;i<40;i++) {
 
-    public double getLd(Integer docId) {
+            try {
+                mDocWeightsFile.seek((long)i*8);
+                double ld = mDocWeightsFile.readDouble();
+                System.out.println("doc: "+i+" : ld - "+ld);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public double getLd(int docId) {
 
         try {
-            mDocWeightsFile.seek(docId*8*4);
+            mDocWeightsFile.seek(docId * 32);
+            return mDocWeightsFile.readDouble();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return -1;
+    }
+
+    public double getDocLenD(int docId) {
+
+        try {
+            mDocWeightsFile.seek((docId * 32) + 8);
+            return mDocWeightsFile.readDouble();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return -1;
+    }
+
+    public double getDocByteSize(int docId) {
+
+        try {
+            mDocWeightsFile.seek((docId * 32) + 16);
+            return mDocWeightsFile.readDouble();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return -1;
+    }
+
+    public double getAvgTftd(int docId) {
+
+        try {
+            mDocWeightsFile.seek((docId * 32) + 24);
+            return mDocWeightsFile.readDouble();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return -1;
+    }
+
+    public double getAvgLenOfCorpus() {
+
+        try {
+            mDocWeightsFile.seek(mDocWeightsFile.length() - 8);
             return mDocWeightsFile.readDouble();
         } catch (IOException e) {
             e.printStackTrace();

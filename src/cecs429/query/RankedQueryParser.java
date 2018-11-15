@@ -1,5 +1,6 @@
 package cecs429.query;
 
+import cecs429.VariantMethodsInterface;
 import cecs429.index.DiskPositionalIndex;
 import cecs429.index.Posting;
 
@@ -23,20 +24,24 @@ public class RankedQueryParser {
         });
     }
 
-    public List<Posting> getRankedDocuments(HashMap<String, java.util.List<Posting>> hashMapTerms, int N, String path) {
+    public List<Posting> getRankedDocuments(HashMap<String, java.util.List<Posting>> hashMapTerms, int N, VariantMethodsInterface variant) {
 
         for(String term : hashMapTerms.keySet()) {
             java.util.List<Posting> postingList = hashMapTerms.get(term);
 
-            float f = (float) N/postingList.size();
-            System.out.println("f: " +f);
-            float wqt = (float) Math.log(1.0f + f);
+//
+//            float f = (float) N/postingList.size();
+//            System.out.println("f: " +f);
+//
+            float wqt = variant.getWQT(postingList.size(), N);
             System.out.println("wqt: " +wqt);
 
             for(Posting posting : postingList) {
 
                 // Calculate wdt.
-                float wdt = 1.0f + ((float)Math.log(posting.getTftd()));
+                System.out.println("TFTD (Doc" + posting.getDocumentId()+") : "+posting.getTftd());
+
+                float wdt = variant.getWDT(posting.getTftd(), posting.getDocumentId());
 
                 System.out.println("WDT (Doc" + posting.getDocumentId()+") : "+wdt);
                 if(mAccum.containsKey(posting.getDocumentId())) {
@@ -48,12 +53,11 @@ public class RankedQueryParser {
         }
 
         // Create diskPositionalIndex object to retrieve LD values from this class. As this class can only read files.
-        DiskPositionalIndex diskPositionalIndex = new DiskPositionalIndex(path);
-
         mAccum.forEach((docId, ad) -> {
 
                 if(ad!=0) {
-                    double ld = diskPositionalIndex.getLd(docId);
+                    double ld = variant.getLD(docId);
+                    System.out.println("ld: (doc "+docId+") : " +ld);
                     ad = ad/((float)ld);
                     mAccum.put(docId, ad);
 
@@ -77,7 +81,7 @@ public class RankedQueryParser {
 
             int docId = entry.getKey();
             System.out.println("AD (Doc" + docId+") : "+entry.getValue());
-            resultPostings.add(new Posting(docId));
+            resultPostings.add(new Posting(docId, entry.getValue()));
         }
 
         return resultPostings;

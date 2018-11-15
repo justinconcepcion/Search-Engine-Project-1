@@ -6,6 +6,7 @@ import java.util.List;
 import cecs429.porterstemmer.SnowballStemmer;
 
 public class PorterTokenProcessor implements MultipleTokenProcessor {
+
     public List<String> processToken(String term) {
 
         ArrayList<String> tokens = new ArrayList<String>();
@@ -13,10 +14,13 @@ public class PorterTokenProcessor implements MultipleTokenProcessor {
         String temp = "";
         temp = removeNonAlphaNumeric(term);
         temp = removeQuotes(temp);
-        if (temp.contains("-"))
-            tokens = (ArrayList<String>) removeHyphens(temp.toLowerCase());
-        else
+        if (temp.contains("-")){
+            // TODO To ask, if we need to remove hyphens while rank indexing
+//            tokens = (ArrayList<String>) removeHyphens(temp.toLowerCase());
+        }
+        else {
             tokens.add(temp.toLowerCase());
+        }
 
         try {
             for (String token : tokens) {
