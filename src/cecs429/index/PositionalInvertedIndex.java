@@ -1,5 +1,7 @@
 package cecs429.index;
 
+import cecs429.variantmethods.OkapiVariant;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -71,4 +73,29 @@ public class PositionalInvertedIndex implements Index {
 
     }
 
+    public void addWdt(String term, int docId, double[] wdts) {
+        List<Posting> postings = mAdjacencyList.get(term);
+        for(int i=0;i<postings.size();i++) {
+            if (postings.get(i).getDocumentId() == docId) {
+                postings.get(i).setmWdts(wdts);
+                break;
+            }
+        }
+    }
+
+    /**
+     * As Okapi variant requires Avg length of entire corpus, we need to call this method seperately.
+     * @param hashmap consists of <docID, docLength>.
+     * @param docAveLength Average length of docs in entire corpus.
+     */
+    public void addWdtForOkapi(HashMap<Integer, Integer> hashmap, double docAveLength){
+        for(String term : mAdjacencyList.keySet()) {
+            List<Posting> postingList = mAdjacencyList.get(term);
+            for (Posting posting : postingList) {
+
+                double wdt = new OkapiVariant(hashmap.get(posting.getDocumentId()), docAveLength).getWDT(posting.getPositions().size(), posting.getDocumentId());
+                posting.getmWdts()[3] = wdt;
+            }
+        }
+    }
 }

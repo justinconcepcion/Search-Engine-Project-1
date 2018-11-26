@@ -21,10 +21,10 @@ public class DiskIndexWriter {
 
         // Create postings.bin and return a Data structure that will contain byte position(a long) of each term
         // in the vocabulary begins in postings file.
-
         List<String> vocabularyWords = index.getVocabulary();
-        long[] postingsPositions = new long[vocabularyWords.size()];
 
+        // As we know the size of the array, we are selecting primitive types instead of ArrayList.
+        long[] postingsPositions = new long[vocabularyWords.size()];
         createPostingsBin(index, vocabularyWords, postingsPositions);
 
         long[] vocabularyPositions = new long[vocabularyWords.size()];
@@ -32,14 +32,13 @@ public class DiskIndexWriter {
         createVocabBin(vocabularyWords, vocabularyPositions);
 
         // Create vocabTable.bin, which will contain both byte positions of postings and term.
-//        createVocabTableBin(vocabularyPositions, postingsPositions);
-
+        // createVocabTableBin(vocabularyPositions, postingsPositions);
         createBPlusTree(vocabularyWords, postingsPositions);
     }
 
     private void createBPlusTree(List<String> vocabularyWords, long[] postingsPositions) {
-        /** create (or open existing) database */
 
+        // create (or open existing) database
         File bPlusTreeFile = new File(mPath + File.separator + "bplusttree" + File.separator + "SET_BPlusTree");
         bPlusTreeFile.getParentFile().mkdirs(); // Create folders if does not exist.
         String fileName = bPlusTreeFile.getPath();
@@ -47,23 +46,22 @@ public class DiskIndexWriter {
         try {
             recMan = RecordManagerFactory.createRecordManager(fileName);
 
-            /** Creates TreeMap which stores data in database.
-             *  Constructor method takes recordName (something like SQL table name)*/
+            // Creates TreeMap which stores data in database.
+            // Constructor method takes recordName (something like SQL table name)
             String recordName = "firstTreeMap";
-            PrimaryTreeMap<String,Long> treeMap = recMan.treeMap(recordName);
+            PrimaryTreeMap<String, Long> treeMap = recMan.treeMap(recordName);
 
-            /** add some stuff to map*/
-            for (int i = 0;i<vocabularyWords.size();i++) {
+            // add some stuff to map
+            for (int i = 0; i < vocabularyWords.size(); i++) {
                 treeMap.put(vocabularyWords.get(i), postingsPositions[i]);
             }
 
             System.out.println(treeMap.keySet());
-            // > [1, 2, 3]
 
-            /** Map changes are not persisted yet, commit them (save to disk) */
+            // Map changes are not persisted yet, commit them (save to disk) */
             recMan.commit();
 
-            /** close record manager */
+            // close record manager
             recMan.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -81,46 +79,33 @@ public class DiskIndexWriter {
             for (int i = 0; i < vocabularyWords.size(); i++) {
 
                 List<Posting> termPostings = index.getPostingsWithPositions(vocabularyWords.get(i));
-
                 postingsPositions[i] = dataOutputStream.size();
+
                 // Write dft: doc frequency.
                 dataOutputStream.writeInt(termPostings.size());
 
                 for (int j = 0; j < termPostings.size(); j++) {
-                    // Write doc id. (with gaps)
 
-                    if (j == 0) {
+                    if (j == 0) {// Write doc id. (with gaps)
+
                         // If it is first doc, then insert as it is.
                         dataOutputStream.writeInt(termPostings.get(j).getDocumentId());
-                    } else {
-                        // else insert gap.
+                    } else {// else insert gap.
+
                         dataOutputStream.writeInt(termPostings.get(j).getDocumentId() - termPostings.get(j - 1).getDocumentId());
                     }
 
-                    // @TODO: Remove comments
-//                    if(vocabularyWords.get(i).equals("whale")) {
-//
-//                        System.out.println("term:  "+vocabularyWords.get(i));
-//                        System.out.println("i: "+i);
-//                        System.out.println("j: "+j);
-//                        System.out.println("original doc ID: --------"+termPostings.get(j).getDocumentId());
-//                        System.out.println("doc ID: --------"+docId);
-//                    }
+                    // Write wdts dynamically. Dynamically means, any number of variants could be passed.
+                    for (int z = 0; z < termPostings.get(j).getmWdts().length; z++) {
+                        dataOutputStream.writeDouble(termPostings.get(j).getmWdts()[z]);
+                    }
 
-                    // Write term frequency.
-                    dataOutputStream.writeInt(termPostings.get(j).getPositions().size());
+                    dataOutputStream.writeInt(termPostings.get(j).getPositions().size());// Write term frequency.
 
-                    // Write positions.
-                    for (int k = 0; k < termPostings.get(j).getPositions().size(); k++) {
+                    for (int k = 0; k < termPostings.get(j).getPositions().size(); k++) {// Write positions.
                         dataOutputStream.writeInt(termPostings.get(j).getPositions().get(k));
                     }
                 }
-
-                // @TODO: Remove comments
-//                if(i<5) {
-//                    System.out.println("postings.bin: --------");
-//                    System.out.println("Word - "+vocabularyWords.get(i)+" : position - "+postingsPositions[i]);
-//                }
             }
 
         } catch (IOException e) {
@@ -141,25 +126,17 @@ public class DiskIndexWriter {
             File vocabBinFile = new File(mPath + File.separator + "vocab.bin");
             vocabBinFile.getParentFile().mkdirs(); // Create folders if does not exist.
 
-            FileOutputStream file = new FileOutputStream(vocabBinFile); // append : false.
+            FileOutputStream file = new FileOutputStream(vocabBinFile);
             dataOutputStream = new DataOutputStream(file);
 
             int currentVocabPosition = 0;
             for (int i = 0; i < vocabularyWords.size(); i++) {
                 String currentWord = vocabularyWords.get(i);
                 vocabularyPositions[i] = currentVocabPosition;
-                // @TODO: Remove comments
-//                if(i<5) {
-//
-//                    System.out.println("vocab.bin: --------");
-//                    System.out.println("Word - "+currentWord+" : position - "+currentVocabPosition);
-//                }
                 dataOutputStream.writeBytes(currentWord);
                 currentVocabPosition = currentVocabPosition + currentWord.length();
 
             }
-
-
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -172,46 +149,11 @@ public class DiskIndexWriter {
 
     }
 
-
-    private void createVocabTableBin(long[] vocabularyPositions, long[] postingsPositions) {
-
-        DataOutputStream dataOutputStream = null;
-        try {
-            File vocabBinFile = new File(mPath + File.separator + "vocabTable.bin");
-            vocabBinFile.getParentFile().mkdirs(); // Create folders if does not exist.
-
-            FileOutputStream file = new FileOutputStream(vocabBinFile); // append : false.
-            dataOutputStream = new DataOutputStream(file);
-
-            for (int i = 0; i < vocabularyPositions.length; i++) {
-                dataOutputStream.writeLong(vocabularyPositions[i]);
-                dataOutputStream.writeLong(postingsPositions[i]);
-
-                if(i<5) {
-
-                    System.out.println("size: vocabtable "+dataOutputStream.size()/8);
-                }
-
-                // @TODO: Remove comments
-//                if(i<5) {
-//
-//                    System.out.println("vocabTable.bin: --------");
-//                    System.out.println("vocabularyPositions - "+vocabularyPositions[i]+" : postingsPositions - "+postingsPositions[i]);
-//                }
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                closeDataOutputStream(dataOutputStream);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-
+    /**
+     * Write LD into 'docWeights.bin' file.
+     *
+     * @param ld List of Doubles, which has LDs of every document.
+     */
     void writeLDToDocWeights(List<Double> ld) {
 
         DataOutputStream dataOutputStream = null;
@@ -245,6 +187,35 @@ public class DiskIndexWriter {
         if (dataOutputStream != null) {
             dataOutputStream.flush();
             dataOutputStream.close();
+        }
+    }
+
+    /*
+    This method is used to save Vocabulary of a corpus onto a disk. We are using it if we use Binary Search on the Vocab.
+     */
+    private void createVocabTableBin(long[] vocabularyPositions, long[] postingsPositions) {
+
+        DataOutputStream dataOutputStream = null;
+        try {
+            File vocabBinFile = new File(mPath + File.separator + "vocabTable.bin");
+            vocabBinFile.getParentFile().mkdirs(); // Create folders if does not exist.
+
+            FileOutputStream file = new FileOutputStream(vocabBinFile); // append : false.
+            dataOutputStream = new DataOutputStream(file);
+
+            for (int i = 0; i < vocabularyPositions.length; i++) {
+                dataOutputStream.writeLong(vocabularyPositions[i]);
+                dataOutputStream.writeLong(postingsPositions[i]);
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                closeDataOutputStream(dataOutputStream);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

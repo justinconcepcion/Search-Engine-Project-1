@@ -1,11 +1,13 @@
 package cecs429.query;
 
-import cecs429.VariantMethodsInterface;
-import cecs429.index.DiskPositionalIndex;
+import cecs429.variantmethods.VariantMethodsInterface;
 import cecs429.index.Posting;
 
 import java.util.*;
 
+/**
+ * Calculate the ranks for each postings list of a term.
+ */
 public class RankedQueryParser {
 
     private Map<Integer, Float> mAccum;
@@ -24,30 +26,24 @@ public class RankedQueryParser {
         });
     }
 
-    public List<Posting> getRankedDocuments(HashMap<String, java.util.List<Posting>> hashMapTerms, int N, VariantMethodsInterface variant) {
+    public List<Posting> getRankedDocuments(HashMap<String, java.util.List<Posting>> hashMapTerms, int N, VariantMethodsInterface variant, String path, int methodNumber) {
 
         for(String term : hashMapTerms.keySet()) {
             java.util.List<Posting> postingList = hashMapTerms.get(term);
 
-//
-//            float f = (float) N/postingList.size();
-//            System.out.println("f: " +f);
-//
             float wqt = variant.getWQT(postingList.size(), N);
-            System.out.println("wqt: " +wqt);
 
             for(Posting posting : postingList) {
 
                 // Calculate wdt.
-                System.out.println("TFTD (Doc" + posting.getDocumentId()+") : "+posting.getTftd());
+                // float wdt = variant.getWDT(posting.getTftd(), posting.getDocumentId());
+                double[] wdts = posting.getmWdts();
+                double wdt = wdts[methodNumber];
 
-                float wdt = variant.getWDT(posting.getTftd(), posting.getDocumentId());
-
-                System.out.println("WDT (Doc" + posting.getDocumentId()+") : "+wdt);
                 if(mAccum.containsKey(posting.getDocumentId())) {
-                    mAccum.put(posting.getDocumentId(), mAccum.get(posting.getDocumentId())+(wdt * wqt));
+                    mAccum.put(posting.getDocumentId(), mAccum.get(posting.getDocumentId())+((float)wdt * wqt));
                 } else {
-                    mAccum.put(posting.getDocumentId(), wdt * wqt);
+                    mAccum.put(posting.getDocumentId(), (float)wdt * wqt);
                 }
             }
         }
@@ -56,8 +52,7 @@ public class RankedQueryParser {
         mAccum.forEach((docId, ad) -> {
 
                 if(ad!=0) {
-                    double ld = variant.getLD(docId);
-                    System.out.println("ld: (doc "+docId+") : " +ld);
+                    double ld = variant.getLD(path, docId);
                     ad = ad/((float)ld);
                     mAccum.put(docId, ad);
 
@@ -78,10 +73,8 @@ public class RankedQueryParser {
         }
         for(int i = 0; i < k; i ++){
             Map.Entry<Integer, Float> entry = mPriorityQueue.remove();
-
             int docId = entry.getKey();
-            System.out.println("AD (Doc" + docId+") : "+entry.getValue());
-            resultPostings.add(new Posting(docId, entry.getValue()));
+            resultPostings.add(new Posting(docId, (double)entry.getValue()));
         }
 
         return resultPostings;

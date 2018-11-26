@@ -15,6 +15,7 @@ import cecs429.text.EnglishTokenStream;
 import cecs429.text.MultipleTokenProcessor;
 import cecs429.text.PorterTokenProcessor;
 import cecs429.text.TokenStream;
+import cecs429.variantmethods.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -27,7 +28,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -56,10 +56,13 @@ class MilestoneJFrame extends JFrame {
     private JButton mButtonStem;
     private JButton mBtnSearchDiskIndex;
     private JComboBox mTfIdfVariants;
-
+    private JRadioButton radioRankedRetrieval;
     private DocumentCorpus mDocumentCorpus;
     private MultipleTokenProcessor mTokenProcessor;
+    private String[] variants = {"Default", "tf-idf", "Wacky", "Okapi BM25"};
     private Index index;
+    private JPanel mJPanel;
+
 
     /**
      * Constructor for Milestone JFrame.
@@ -73,6 +76,7 @@ class MilestoneJFrame extends JFrame {
     }
 
     private void initializeMilestone(int milestoneNumber) {
+
         mTokenProcessor = new PorterTokenProcessor();
         if (milestoneNumber == MILESTONE_1) {
             setTitle("Milestone 1");
@@ -82,7 +86,7 @@ class MilestoneJFrame extends JFrame {
         setBounds(new Rectangle(0, 0, 900, 900));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        JPanel mJPanel = new JPanel();
+        mJPanel = new JPanel();
         mJPanel.setBounds(20, 20, 800, 200);
         getContentPane().add(mJPanel);
         mJPanel.setLayout(null);
@@ -103,8 +107,8 @@ class MilestoneJFrame extends JFrame {
 
         JButton btnBack = new JButton();
         try {
-            Image newimg = ImageIO.read(getClass().getResource("resources/back.png")).getScaledInstance(40, 40, java.awt.Image.SCALE_SMOOTH);
-            btnBack.setIcon(new ImageIcon(newimg));
+            Image imageBack = ImageIO.read(getClass().getResource("resources/back.png")).getScaledInstance(40, 40, java.awt.Image.SCALE_SMOOTH);
+            btnBack.setIcon(new ImageIcon(imageBack));
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -136,147 +140,163 @@ class MilestoneJFrame extends JFrame {
 
         if (milestoneNumber == MILESTONE_1) {
 
-            mButtonIndex = new JButton("Index");
-            mButtonIndex.setBounds(335 + 265, 90 - 30 + 50, 239, 23);
-            mButtonIndex.setEnabled(false);
-            mButtonIndex.addActionListener(e -> {
-
-                // After clicking index button, get current time before indexing and get time after indexing.
-                long startTime = System.currentTimeMillis();
-
-                index = indexCorpus(mDocumentCorpus, mTokenProcessor);
-                long stopTime = System.currentTimeMillis();
-
-                // Calculating total time taken for indexing.
-                long elapsedTime = stopTime - startTime;
-                mLableInfo.setText(mLableInfo.getText() + "\nDone Indexing." + "\n\nTime to index = " + TimeUnit.MILLISECONDS.toSeconds(elapsedTime) + " seconds");
-                enableButtons(milestoneNumber);
-            });
-            mJPanel.add(mButtonIndex);
-
-            mSplitPane = new JSplitPane();
-            mSplitPane.setBounds(10, 123 + 50, 854, 527);
-            mJPanel.add(mSplitPane);
-
-            mTextAreaOutput = new JTextArea();
-            mTextAreaOutput.setWrapStyleWord(true);
-            mSplitPane.setRightComponent(new JScrollPane(mTextAreaOutput));
-            mSplitPane.setLeftComponent(new JScrollPane(new JTextArea()));
-
-            mButtonSearch = new JButton("Search");
-            mButtonSearch.setBounds(110, 90 - 30 + 50, 239, 23);
-            mButtonSearch.setEnabled(false);
-            mButtonSearch.addActionListener(e -> {
-                if (mTextFieldQuery.getText().trim().isEmpty()) {
-                    JOptionPane.showMessageDialog(MilestoneJFrame.this, "Please enter a search query.");
-                } else {
-                    searchClick(MILESTONE_1);
-                }
-            });
-            mJPanel.add(mButtonSearch);
-
-            mButtonVocab = new JButton("Show Vocabulary");
-            mButtonVocab.setBounds(110, 90 + 50, 239, 23);
-            mButtonVocab.setEnabled(false);
-            mButtonVocab.addActionListener(e -> {
-
-
-                java.util.List<String> vocabList = index.getVocabulary();
-                mTextAreaOutput.setText("");
-                for (int i = 0; i < 1000; i++) {
-
-                    mTextAreaOutput.setText(mTextAreaOutput.getText() + "\n" + vocabList.get(i));
-                }
-            });
-            mJPanel.add(mButtonVocab);
-
-
-            mButtonStem = new JButton("Stem");
-            mButtonStem.setBounds(355, 90 - 30 + 50, 239, 23);
-            mButtonStem.setEnabled(false);
-            mButtonStem.addActionListener(e -> {
-                mTextAreaOutput.setText("");
-                mTextAreaOutput.setText(mTokenProcessor.processToken(mTextFieldQuery.getText()).get(0));
-            });
-            mJPanel.add(mButtonStem);
+            setMilestoneOneUI(milestoneNumber);
 
         } else if (milestoneNumber == MILESTONE_2) {
 
-            mButtonDiskIndex = new JButton("DiskIndex");
-            mButtonDiskIndex.setBounds(335 + 265, 90 - 30 + 50, 239, 23);
-            mButtonDiskIndex.setEnabled(false);
-            mButtonDiskIndex.addActionListener(e -> {
-
-                // After clicking index button, get current time before indexing and get time after indexing.
-                long startTime = System.currentTimeMillis();
-                index = indexCorpus(mDocumentCorpus, mTokenProcessor);
-                long stopTime = System.currentTimeMillis();
-
-                // Calculating total time taken for indexing.
-                long elapsedTime = stopTime - startTime;
-                mLableInfo.setText(mLableInfo.getText() + "\nDone Indexing." + "\n\nTime to index = " + TimeUnit.MILLISECONDS.toMillis(elapsedTime) + " seconds");
-
-                // Start creating disk index.
-                new DiskIndexWriter(mLablePath.getText() + "\\index").writeIndex(index);
-                enableButtons(milestoneNumber);
-            });
-            mJPanel.add(mButtonDiskIndex);
-
-
-            mSplitPane = new JSplitPane();
-            mSplitPane.setBounds(10, 123 + 50, 854, 527);
-            mJPanel.add(mSplitPane);
-
-            mTextAreaOutput = new JTextArea();
-            mTextAreaOutput.setWrapStyleWord(true);
-            mSplitPane.setRightComponent(new JScrollPane(mTextAreaOutput));
-            mSplitPane.setLeftComponent(new JScrollPane(new JTextArea()));
-
-            mBtnSearchDiskIndex = new JButton("SearchFromDiskIndex");
-            mBtnSearchDiskIndex.setBounds(110, 90 - 30 + 50, 239, 23);
-            mBtnSearchDiskIndex.setEnabled(false);
-            mBtnSearchDiskIndex.addActionListener(e -> {
-                if (mTextFieldQuery.getText().trim().isEmpty()) {
-                    JOptionPane.showMessageDialog(MilestoneJFrame.this, "Please enter a search query.");
-                } else {
-
-                    searchClick(MILESTONE_2);
-                }
-            });
-            mJPanel.add(mBtnSearchDiskIndex);
-
-            JRadioButton radioRankedRetrieval = new JRadioButton();
-            radioRankedRetrieval.setMnemonic(KeyEvent.VK_B);
-            radioRankedRetrieval.setActionCommand("Ranked");
-            radioRankedRetrieval.setText("Ranked");
-            radioRankedRetrieval.setBounds(10, 700, 100, 30);
-            radioRankedRetrieval.setSelected(true);
-
-            JRadioButton radioBooleanRetrieval = new JRadioButton();
-            radioBooleanRetrieval.setMnemonic(KeyEvent.VK_B);
-            radioBooleanRetrieval.setText("Boolean");
-            radioBooleanRetrieval.setActionCommand("Boolean");
-            radioBooleanRetrieval.setBounds(110, 700, 100, 30);
-
-            ButtonGroup buttonGroup = new ButtonGroup();
-            buttonGroup.add(radioRankedRetrieval);
-            buttonGroup.add(radioBooleanRetrieval);
-            mJPanel.add(radioRankedRetrieval);
-            mJPanel.add(radioBooleanRetrieval);
-
-            String[] variants = {"Default", "tf-idf", "Okapi BM25", "Wacky"};
-
-            //Create the combo box, select item at index 4.
-            //Indices start at 0, so 4 specifies the pig.
-            mTfIdfVariants = new JComboBox(variants);
-            mTfIdfVariants.setBounds(110, 90 + 50, 239, 23);
-            mTfIdfVariants.setSelectedIndex(0);
-            mTfIdfVariants.setEnabled(false);
-            mJPanel.add(mTfIdfVariants);
+            setMilestoneTwoUI(milestoneNumber);
 
         }
         setVisible(true);
     }
+
+    /*
+    Initialize UI elements required for Milestone One.
+     */
+    private void setMilestoneOneUI(int milestoneNumber) {
+
+        mButtonIndex = new JButton("Index");
+        mButtonIndex.setBounds(335 + 265, 90 - 30 + 50, 239, 23);
+        mButtonIndex.setEnabled(false);
+        mButtonIndex.addActionListener(e -> {
+
+            // After clicking index button, get current time before indexing and get time after indexing.
+            long startTime = System.currentTimeMillis();
+
+            index = indexCorpus(mDocumentCorpus, mTokenProcessor, MILESTONE_1);
+            long stopTime = System.currentTimeMillis();
+
+            // Calculating total time taken for indexing.
+            long elapsedTime = stopTime - startTime;
+            mLableInfo.setText(mLableInfo.getText() + "\nDone Indexing." + "\n\nTime to index = " + TimeUnit.MILLISECONDS.toSeconds(elapsedTime) + " seconds");
+            enableButtons(milestoneNumber);
+        });
+        mJPanel.add(mButtonIndex);
+
+        mSplitPane = new JSplitPane();
+        mSplitPane.setBounds(10, 123 + 50, 854, 527);
+        mJPanel.add(mSplitPane);
+
+        mTextAreaOutput = new JTextArea();
+        mTextAreaOutput.setWrapStyleWord(true);
+        mSplitPane.setRightComponent(new JScrollPane(mTextAreaOutput));
+        mSplitPane.setLeftComponent(new JScrollPane(new JTextArea()));
+
+        mButtonSearch = new JButton("Search");
+        mButtonSearch.setBounds(110, 90 - 30 + 50, 239, 23);
+        mButtonSearch.setEnabled(false);
+        mButtonSearch.addActionListener(e -> {
+            if (mTextFieldQuery.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(MilestoneJFrame.this, "Please enter a search query.");
+            } else {
+                searchClick(MILESTONE_1);
+            }
+        });
+        mJPanel.add(mButtonSearch);
+
+        mButtonVocab = new JButton("Show Vocabulary");
+        mButtonVocab.setBounds(110, 90 + 50, 239, 23);
+        mButtonVocab.setEnabled(false);
+        mButtonVocab.addActionListener(e -> {
+
+
+            java.util.List<String> vocabList = index.getVocabulary();
+            mTextAreaOutput.setText("");
+            for (int i = 0; i < 1000; i++) {
+
+                mTextAreaOutput.setText(mTextAreaOutput.getText() + "\n" + vocabList.get(i));
+            }
+        });
+        mJPanel.add(mButtonVocab);
+
+
+        mButtonStem = new JButton("Stem");
+        mButtonStem.setBounds(355, 90 - 30 + 50, 239, 23);
+        mButtonStem.setEnabled(false);
+        mButtonStem.addActionListener(e -> {
+            mTextAreaOutput.setText("");
+            mTextAreaOutput.setText(mTokenProcessor.processToken(mTextFieldQuery.getText()).get(0));
+        });
+        mJPanel.add(mButtonStem);
+
+    }
+
+    /*
+    Initialize UI elements required for Milestone Two.
+     */
+    private void setMilestoneTwoUI(int milestoneNumber) {
+        mButtonDiskIndex = new JButton("DiskIndex");
+        mButtonDiskIndex.setBounds(335 + 265, 90 - 30 + 50, 239, 23);
+        mButtonDiskIndex.setEnabled(false);
+        mButtonDiskIndex.addActionListener(e -> {
+
+            // After clicking index button, get current time before indexing and get time after indexing.
+            long startTime = System.currentTimeMillis();
+            index = indexCorpus(mDocumentCorpus, mTokenProcessor, MILESTONE_2);
+            long stopTime = System.currentTimeMillis();
+
+            // Calculating total time taken for indexing.
+            long elapsedTime = stopTime - startTime;
+            mLableInfo.setText(mLableInfo.getText() + "\nDone Indexing." + "\n\nTime to index = " + TimeUnit.MILLISECONDS.toMillis(elapsedTime) + " seconds");
+
+            // Start creating disk index.
+            new DiskIndexWriter(mLablePath.getText() + "\\index").writeIndex(index);
+            enableButtons(milestoneNumber);
+        });
+        mJPanel.add(mButtonDiskIndex);
+
+
+        mSplitPane = new JSplitPane();
+        mSplitPane.setBounds(10, 123 + 50, 854, 527);
+        mJPanel.add(mSplitPane);
+
+        mTextAreaOutput = new JTextArea();
+        mTextAreaOutput.setWrapStyleWord(true);
+        mSplitPane.setRightComponent(new JScrollPane(mTextAreaOutput));
+        mSplitPane.setLeftComponent(new JScrollPane(new JTextArea()));
+
+        mBtnSearchDiskIndex = new JButton("SearchFromDiskIndex");
+        mBtnSearchDiskIndex.setBounds(110, 90 - 30 + 50, 239, 23);
+        mBtnSearchDiskIndex.setEnabled(false);
+        mBtnSearchDiskIndex.addActionListener(e -> {
+            if (mTextFieldQuery.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(MilestoneJFrame.this, "Please enter a search query.");
+            } else {
+
+                searchClick(MILESTONE_2);
+            }
+        });
+        mJPanel.add(mBtnSearchDiskIndex);
+
+        radioRankedRetrieval = new JRadioButton();
+        radioRankedRetrieval.setMnemonic(KeyEvent.VK_B);
+        radioRankedRetrieval.setActionCommand("Ranked");
+        radioRankedRetrieval.setText("Ranked");
+        radioRankedRetrieval.setBounds(10, 700, 100, 30);
+        radioRankedRetrieval.setSelected(true);
+
+        JRadioButton radioBooleanRetrieval = new JRadioButton();
+        radioBooleanRetrieval.setMnemonic(KeyEvent.VK_B);
+        radioBooleanRetrieval.setText("Boolean");
+        radioBooleanRetrieval.setActionCommand("Boolean");
+        radioBooleanRetrieval.setBounds(110, 700, 100, 30);
+
+        ButtonGroup buttonGroup = new ButtonGroup();
+        buttonGroup.add(radioRankedRetrieval);
+        buttonGroup.add(radioBooleanRetrieval);
+        mJPanel.add(radioRankedRetrieval);
+        mJPanel.add(radioBooleanRetrieval);
+
+        //Create the combo box, select item at index 4.
+        //Indices start at 0, so 4 specifies the pig.
+        mTfIdfVariants = new JComboBox(variants);
+        mTfIdfVariants.setBounds(110, 90 + 50, 239, 23);
+        mTfIdfVariants.setSelectedIndex(0);
+        mTfIdfVariants.setEnabled(false);
+        mJPanel.add(mTfIdfVariants);
+
+    }
+
 
     /**
      * Method to open directory selector and get all files in that folder.
@@ -331,7 +351,6 @@ class MilestoneJFrame extends JFrame {
 
             mBtnSearchDiskIndex.setEnabled(true);
             mTfIdfVariants.setEnabled(true);
-//            new DiskPositionalIndex(mLablePath.getText()+"\\index").readAllLDs();
         }
         mButtonReset.setEnabled(true);
 
@@ -357,50 +376,61 @@ class MilestoneJFrame extends JFrame {
             }
         } else if (milestoneNumber == MILESTONE_2) {
 
+            DiskPositionalIndex diskPositionalIndex = new DiskPositionalIndex(mLablePath.getText() + "\\index", variants.length);
 
-            // @TODO: Query with multiple terms.
+            // Check if radio button for Ranked retrieval is on or for Boolean retrieval.
+            if(radioRankedRetrieval.isSelected()) {
 
-            String[] queryTerms = mTextFieldQuery.getText().split(" ");
+                String[] queryTerms = mTextFieldQuery.getText().split(" ");
 
-            HashMap<String, java.util.List<Posting>> hashMapTerms = new HashMap<>();
+                HashMap<String, java.util.List<Posting>> hashMapTerms = new HashMap<>();
+                for (String term : queryTerms) {
+                    java.util.List<Posting> postings = diskPositionalIndex.getPostingsWithoutPositions(mTokenProcessor.processToken(term).get(0));
+                    hashMapTerms.put(term, postings);
+                }
 
-            for (String term : queryTerms) {
-                java.util.List<Posting> postings = new ArrayList<>();
-                postings = new DiskPositionalIndex(mLablePath.getText() + "\\index").getPostingsWithoutPositions(mTokenProcessor.processToken(term).get(0));
-                hashMapTerms.put(term, postings);
+                VariantMethodsInterface variant = null;
+                switch (mTfIdfVariants.getSelectedIndex()) {
+                    case 1:
+                        variant = new TFIDFVariant();
+                        break;
+                    case 2:
+                        variant = new WackyVariant();
+                        break;
+                    case 3:
+                        variant = new OkapiVariant();
+                        break;
+                    default:
+                        variant = new DefaultVariant();
+                        System.out.println("Default variant");
+                }
+
+                List<Posting> resultPostings = new RankedQueryParser().getRankedDocuments(hashMapTerms, mDocumentCorpus.getCorpusSize(), variant,mLablePath.getText()+"\\index", mTfIdfVariants.getSelectedIndex());
+
+                for (Posting posting : resultPostings) {
+                    DefaultMutableTreeNode tempTreeNode;
+                    tempTreeNode = new DefaultMutableTreeNode(mDocumentCorpus.getDocument(posting.getDocumentId()).getTitle()+" (ID "+posting.getDocumentId()+"): "+posting.getmAccumScore());
+                    top.add(tempTreeNode);
+                }
+            } else {
+
+                QueryComponent temp = new BooleanQueryParser(mTokenProcessor).parseQuery(query);
+
+                for (Posting p : temp.getPostings(diskPositionalIndex)) {
+                    DefaultMutableTreeNode tempTreeNode;
+                    tempTreeNode = new DefaultMutableTreeNode(mDocumentCorpus.getDocument(p.getDocumentId()).getTitle());
+                    top.add(tempTreeNode);
+                }
             }
 
-            VariantMethodsInterface variant = null;
-            switch (mTfIdfVariants.getSelectedIndex()) {
-                case 1:
-                    variant = new TFIDFVariant(mLablePath.getText() + "\\index");
-                    break;
-                case 2:
-                    variant = new OkapiVariant(mLablePath.getText() + "\\index");
-                    break;
-                case 3:
-                    variant = new WackyVariant(mLablePath.getText() + "\\index");
-                    break;
-                default:
-                    variant = new DefaultVariant(mLablePath.getText() + "\\index");
-                    System.out.println("Default variant");
-
-            }
-
-            List<Posting> resultPostings = new RankedQueryParser().getRankedDocuments(hashMapTerms, mDocumentCorpus.getCorpusSize(), variant);
-
-            for (Posting posting : resultPostings) {
-                DefaultMutableTreeNode tempTreeNode;
-                tempTreeNode = new DefaultMutableTreeNode(mDocumentCorpus.getDocument(posting.getDocumentId()).getTitle()+" (ID "+posting.getDocumentId()+"): "+posting.getmAccumScore());
-                top.add(tempTreeNode);
-            }
         }
 
+
+        // Below is UI for setting up UI for showing the results.
         mLableInfo.setText("Logs: " + "\n\nTotal documents:" + top.getChildCount());
 
         mTree = new JTree(top);
         mSplitPane.setLeftComponent(new JScrollPane(mTree));
-
         mTree.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
@@ -431,7 +461,10 @@ class MilestoneJFrame extends JFrame {
 
     }
 
-    private Index indexCorpus(DocumentCorpus corpus, MultipleTokenProcessor processor) {
+    /*
+    Create in memory positional index.
+     */
+    private Index indexCorpus(DocumentCorpus corpus, MultipleTokenProcessor processor, int milestoneNumber) {
 
         TokenStream tokenStream;
         PositionalInvertedIndex index = new PositionalInvertedIndex();
@@ -440,6 +473,7 @@ class MilestoneJFrame extends JFrame {
         // to the writer to write it to DocWeights.
         java.util.List<Double> listForDocWeightsFile = new ArrayList<>();
 
+        HashMap<Integer, Integer> hashMapDocLengths = new HashMap<>();
         double avgDocsLength = 0;
         for (Document d : corpus.getDocuments()) {
 
@@ -455,37 +489,61 @@ class MilestoneJFrame extends JFrame {
 
                         if (!indexTerm.trim().equals("")) {
                             index.addTerm(indexTerm, d.getId(), position);
-                            addToHashMapTFtd(hashMapTFtd, indexTerm);
+
+                            if(milestoneNumber == MILESTONE_2) {
+                                // Add tftds to hashmap, so that we can calculate LDs later.
+                                addToHashMapTFtd(hashMapTFtd, indexTerm);
+                            }
                         }
                     }
                     position++;
                 }
                 tokenStream.close();
 
-                Double ldForDoc = calculateLdForDoc(hashMapTFtd);
-                Double docLengthd = (double) position - 1.0;
-                Double byteSized = (double) d.getSize();
-                Double avgTftd = docLengthd / (double) hashMapTFtd.size();
+                if(milestoneNumber == MILESTONE_2) {
 
-                listForDocWeightsFile.add(ldForDoc);
-                listForDocWeightsFile.add(docLengthd);
-                listForDocWeightsFile.add(byteSized);
-                listForDocWeightsFile.add(avgTftd);
-                // Variable for av
-                avgDocsLength += docLengthd;
+                    double ldForDoc = calculateLdForDoc(hashMapTFtd);
+                    double docLengthd = (double) position - 1.0;
+                    double byteSized = (double) d.getSize();
+                    double avgTftd = docLengthd / (double) hashMapTFtd.size();
 
-                System.out.println("LD (Doc " + d.getId() + ") : " + ldForDoc);
+                    listForDocWeightsFile.add(ldForDoc);
+                    listForDocWeightsFile.add(docLengthd);
+                    listForDocWeightsFile.add(byteSized);
+                    listForDocWeightsFile.add(avgTftd);
+                    // Variable for av
+                    avgDocsLength += docLengthd;
+
+                    // Add Default, tf-idf, wacky wdts. Add Okapi later.
+                    for(String term:hashMapTFtd.keySet()) {
+
+                        double[] wdts = new double[variants.length];
+                        wdts[0] = ((double)new DefaultVariant().getWDT(hashMapTFtd.get(term),d.getId()));
+                        wdts[1] = ((double)new TFIDFVariant().getWDT(hashMapTFtd.get(term),d.getId()));
+                        wdts[2] = ((double)new WackyVariant(avgTftd).getWDT(hashMapTFtd.get(term),d.getId()));
+                        index.addWdt(term, d.getId(), wdts);
+                    }
+
+                    // Store lengths of docs. This is only useful for inserting Okapi Variant, as it required doc lens and avg doc len.
+                    hashMapDocLengths.put(d.getId(), position - 1);
+                }
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
-        avgDocsLength = avgDocsLength / corpus.getCorpusSize();
+        if(milestoneNumber == MILESTONE_2) {
 
-        // Add docLengthA, i.e. the average number of tokens on all the docs at last
-        listForDocWeightsFile.add(avgDocsLength);
-        new DiskIndexWriter(mLablePath.getText() + "\\index").writeLDToDocWeights(listForDocWeightsFile);
+            avgDocsLength = avgDocsLength / corpus.getCorpusSize();
 
+            // Add docLengthA, i.e. the average number of tokens on all the docs at last
+            listForDocWeightsFile.add(avgDocsLength);
+            index.addWdtForOkapi(hashMapDocLengths, avgDocsLength);
+
+            new DiskIndexWriter(mLablePath.getText() + "\\index").writeLDToDocWeights(listForDocWeightsFile);
+
+        }
         return index;
     }
 

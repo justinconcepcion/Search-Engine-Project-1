@@ -8,19 +8,23 @@ import java.util.List;
  * A Posting encapulates a document ID associated with a search query component.
  */
 public class Posting {
+
     private int mTftd;
     private int mDocumentId;
+    private double[] mWdts;
     private List<Integer> mPositions;
-    private float mAccumScore;
+    private double mAccumScore;
 
     public Posting(int documentId) {
         mDocumentId = documentId;
         mPositions = new ArrayList<>();
+        mWdts = new double[4];
     }
 
-    public Posting(int documentId, float accumScore) {
+    public Posting(int documentId, double accumScore) {
         mDocumentId = documentId;
         mAccumScore = accumScore;
+        mWdts = new double[4];
     }
 
     /**
@@ -78,11 +82,19 @@ public class Posting {
         this.mTftd = mTftd;
     }
 
-    public float getmAccumScore() {
+    public double getmAccumScore() {
         return mAccumScore;
     }
 
-    public void setmAccumScore(float mAccumScore) {
+    public void setmAccumScore(double mAccumScore) {
         this.mAccumScore = mAccumScore;
+    }
+
+    public double[] getmWdts() {
+        return mWdts;
+    }
+
+    public void setmWdts(double[] mWdts) {
+        this.mWdts = mWdts;
     }
 }

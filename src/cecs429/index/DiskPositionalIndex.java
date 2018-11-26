@@ -14,12 +14,28 @@ public class DiskPositionalIndex implements Index {
     private RandomAccessFile mVocabTableFile;
     private RandomAccessFile mPostingsFile;
     private RandomAccessFile mVocabFile;
+    private int mNumberOfVariants;
 
     // @TODO: Ask professor, if reading docWeights file here is ok?
     private RandomAccessFile mDocWeightsFile;
 
     public DiskPositionalIndex(String path) {
 
+        mPath = path;
+//            mVocabTableFile = new RandomAccessFile(new File(mPath + File.separator + "vocabTable.bin"), "r");
+        try {
+            mPostingsFile = new RandomAccessFile(new File(mPath + File.separator + "postings.bin"), "r");
+            mVocabFile = new RandomAccessFile(new File(mPath + File.separator + "vocab.bin"), "r");
+            mDocWeightsFile = new RandomAccessFile(new File(mPath + File.separator + "docWeights.bin"), "r");
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public DiskPositionalIndex(String path, int numberOfVariants) {
+
+        mNumberOfVariants = numberOfVariants;
         mPath = path;
         try {
 
@@ -79,9 +95,17 @@ public class DiskPositionalIndex implements Index {
                 if (i != 0) {
                     docId += postingList.get(postingList.size() - 1).getDocumentId();
                 }
+
                 Posting newPosting = new Posting(docId);
 //                System.out.println("docId: "+docId);
                 // Term frequency loop.
+
+                double[] wdts = new double[mNumberOfVariants];
+                for (int n=0;n<mNumberOfVariants;n++) {
+                    wdts[n] = (mPostingsFile.readDouble());
+                }
+                newPosting.setmWdts(wdts);
+
                 int tftd = mPostingsFile.readInt();
                 newPosting.setTftd(tftd);
 
@@ -120,7 +144,6 @@ public class DiskPositionalIndex implements Index {
             PrimaryTreeMap<String, Long> treeMap = recMan.treeMap(recordName);
 
             System.out.println(treeMap.keySet());
-            // > [1, 2, 3]
 
             long postingsLocation = treeMap.get(term);
 
@@ -220,19 +243,6 @@ public class DiskPositionalIndex implements Index {
     @Override
     public List<String> getVocabulary() {
         return null;
-    }
-
-    public void readAllLDs() {
-        for(int i=0;i<40;i++) {
-
-            try {
-                mDocWeightsFile.seek((long)i*8);
-                double ld = mDocWeightsFile.readDouble();
-                System.out.println("doc: "+i+" : ld - "+ld);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     public double getLd(int docId) {
