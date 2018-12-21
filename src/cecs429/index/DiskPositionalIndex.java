@@ -54,7 +54,7 @@ public class DiskPositionalIndex implements Index {
 
         long bytePostionOfPosting = getBytePositionFromVocabTable(term);
 
-        System.out.println("position of a term : " + bytePostionOfPosting);
+        //System.out.println("position of a term : " + bytePostionOfPosting);
         // Get postings From ByteLocation.
         if (bytePostionOfPosting != -1) {
 
@@ -66,8 +66,7 @@ public class DiskPositionalIndex implements Index {
 
     @Override
     public List<Posting> getPostingsWithoutPositions(String term) {
-
-
+    	List<Posting> returnDefault=new ArrayList<>();
         long bytePostionOfPosting = getBytePositionFromVocabTable(term);
 
         // Get postings From ByteLocation.
@@ -75,7 +74,7 @@ public class DiskPositionalIndex implements Index {
 
             return getPostingsFromByteLocation(bytePostionOfPosting, false);
         }
-        return null;
+        return returnDefault;
     }
 
     private List<Posting> getPostingsFromByteLocation(long bytePostionOfPosting, boolean withPositions) {
@@ -87,7 +86,7 @@ public class DiskPositionalIndex implements Index {
             int dft = mPostingsFile.readInt();
 
             // @TODO: Remove Sysouts
-            System.out.println("dft: " + dft);
+            //System.out.println("dft: " + dft);
             for (int i = 0; i < dft; i++) {
 
                 int docId = mPostingsFile.readInt();
@@ -103,7 +102,9 @@ public class DiskPositionalIndex implements Index {
                 double[] wdts = new double[mNumberOfVariants];
                 for (int n=0;n<mNumberOfVariants;n++) {
                     wdts[n] = (mPostingsFile.readDouble());
+                    //System.out.println("wdts "+wdts[n]);
                 }
+               
                 newPosting.setmWdts(wdts);
 
                 int tftd = mPostingsFile.readInt();
@@ -143,9 +144,11 @@ public class DiskPositionalIndex implements Index {
             String recordName = "firstTreeMap";
             PrimaryTreeMap<String, Long> treeMap = recMan.treeMap(recordName);
 
-            System.out.println(treeMap.keySet());
-
-            long postingsLocation = treeMap.get(term);
+            //System.out.println(treeMap.keySet());
+            long postingsLocation=-1;
+            if(treeMap.keySet().contains(term)) {
+            	postingsLocation= treeMap.get(term);
+            }
 
             /** close record manager */
             recMan.close();

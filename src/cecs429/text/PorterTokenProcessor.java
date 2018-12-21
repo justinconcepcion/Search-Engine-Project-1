@@ -16,7 +16,7 @@ public class PorterTokenProcessor implements MultipleTokenProcessor {
         temp = removeQuotes(temp);
         if (temp.contains("-")){
             // TODO To ask, if we need to remove hyphens while rank indexing
-//            tokens = (ArrayList<String>) removeHyphens(temp.toLowerCase());
+            tokens = (ArrayList<String>) removeHyphens(temp.toLowerCase());
         }
         else {
             tokens.add(temp.toLowerCase());

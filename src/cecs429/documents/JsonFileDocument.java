@@ -25,6 +25,7 @@ public class JsonFileDocument implements FileDocument {
     @Override
     public int getId() {
         return mDocumentId;
+    	//return Integer.parseInt(mFilePath.getFileName().toString().substring(0, mFilePath.getFileName().toString().indexOf(".")));
     }
 
     @Override

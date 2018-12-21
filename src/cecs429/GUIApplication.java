@@ -1,8 +1,14 @@
 package cecs429;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.Rectangle;
 
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 public class GUIApplication extends JFrame{
 
@@ -52,7 +58,11 @@ public class GUIApplication extends JFrame{
         JButton btnMilestone3 = new JButton();
         btnMilestone3.setText("Milestone 3");
         btnMilestone3.add(Box.createRigidArea(new Dimension(5, 0)));
-        btnMilestone3.setEnabled(false);
+        btnMilestone3.addActionListener(e -> {
+
+            setVisible(false);
+            new MilestoneJFrame(MILESTONE_3, GUIApplication.this);
+        });
         firstPanel.add(btnMilestone3);
 
         mainPanel.add(firstPanel);

@@ -68,9 +68,8 @@ public class RankedQueryParser {
         // poll the top k
         List<Posting> resultPostings = new ArrayList<>();
         int k = mPriorityQueue.size();
-        if(k>10) {
-            k=10;
-        }
+        if(k>50) {
+            k=50;        }
         for(int i = 0; i < k; i ++){
             Map.Entry<Integer, Float> entry = mPriorityQueue.remove();
             int docId = entry.getKey();
